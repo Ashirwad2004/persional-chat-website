@@ -119,7 +119,7 @@ export default function Dashboard() {
     return (
         <div className="flex h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden w-full">
             {/* Sidebar Navigation (Compact) */}
-            <aside className="w-20 border-r border-slate-200 dark:border-slate-800 flex flex-col items-center py-6 gap-8 bg-white dark:bg-background-dark/50">
+            <aside className="hidden md:flex w-20 border-r border-slate-200 dark:border-slate-800 flex-col items-center py-6 gap-8 bg-white dark:bg-background-dark/50 shrink-0">
                 <div className="bg-primary/10 p-3 rounded-xl text-primary">
                     <span className="material-symbols-outlined text-3xl">bubble_chart</span>
                 </div>
@@ -151,17 +151,25 @@ export default function Dashboard() {
             </aside>
 
             {/* Conversation List */}
-            <section className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-background-dark">
-                <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold font-display">Messages</h1>
+            <section className={`border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-background-dark shrink-0 h-full ${activeUser ? 'hidden md:flex w-80' : 'w-full md:w-80'}`}>
+                <div className="p-4 md:p-6">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="md:hidden relative cursor-pointer" title="Your Profile">
+                                <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 ring-2 ring-primary/20">
+                                    {currentUser ? getInitials(currentUser.email) : 'U'}
+                                </div>
+                                <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 ${isConnected ? 'bg-green-500' : 'bg-red-500'} border-2 border-slate-50 dark:border-background-dark rounded-full`}></div>
+                            </div>
+                            <h1 className="text-2xl font-bold font-display">Messages</h1>
+                        </div>
                         <button className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
                             <span className="material-symbols-outlined text-sm">edit</span>
                         </button>
                     </div>
                     <div className="relative">
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-                        <input className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all" placeholder="Search chats..." type="text" />
+                        <input className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-[16px] md:text-sm transition-all" placeholder="Search chats..." type="text" />
                     </div>
                 </div>
                 <div className="flex-1 overflow-y-auto px-3 space-y-1">
@@ -195,12 +203,18 @@ export default function Dashboard() {
             </section>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative bg-white dark:bg-slate-900">
+            <main className={`flex-1 flex-col relative bg-white dark:bg-slate-900 h-full ${activeUser ? 'flex' : 'hidden md:flex'}`}>
                 {activeUser ? (
                     <>
                         {/* Chat Header */}
-                        <header className="h-20 flex items-center justify-between px-8 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 shrink-0">
-                            <div className="flex items-center gap-4">
+                        <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 shrink-0">
+                            <div className="flex items-center gap-2 md:gap-4">
+                                <button
+                                    onClick={() => setActiveUser(null)}
+                                    className="md:hidden p-2 -ml-2 mr-1 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all flex items-center justify-center"
+                                >
+                                    <span className="material-symbols-outlined text-xl">arrow_back_ios_new</span>
+                                </button>
                                 <div className="relative shrink-0">
                                     <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold">
                                         {getInitials(activeUser.email)}
@@ -212,22 +226,22 @@ export default function Dashboard() {
                                     <p className="text-xs text-green-500 font-medium">Online</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 md:gap-2">
                                 <button className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-                                    <span className="material-symbols-outlined">videocam</span>
+                                    <span className="material-symbols-outlined text-[20px] md:text-2xl">videocam</span>
                                 </button>
                                 <button className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-                                    <span className="material-symbols-outlined">call</span>
+                                    <span className="material-symbols-outlined text-[20px] md:text-2xl">call</span>
                                 </button>
-                                <div className="w-px h-6 bg-slate-200 dark:border-slate-800 mx-2"></div>
+                                <div className="hidden md:block w-px h-6 bg-slate-200 dark:bg-slate-800 mx-2"></div>
                                 <button className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-                                    <span className="material-symbols-outlined">info</span>
+                                    <span className="material-symbols-outlined text-[20px] md:text-2xl">info</span>
                                 </button>
                             </div>
                         </header>
 
                         {/* Messages Stream */}
-                        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-20 md:pb-8">
                             <div className="flex justify-center">
                                 <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">Start of Conversation</span>
                             </div>
@@ -253,24 +267,25 @@ export default function Dashboard() {
                         </div>
 
                         {/* Message Input */}
-                        <footer className="p-6 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
+                        <footer className="p-3 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
                             <form onSubmit={handleSend} className="max-w-4xl mx-auto relative group">
-                                <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 focus-within:border-primary transition-all">
-                                    <button type="button" className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                <div className="flex items-center gap-2 md:gap-3 bg-slate-50 dark:bg-slate-800/50 p-2 md:p-3 rounded-2xl border border-slate-200 dark:border-slate-700 focus-within:border-primary transition-all shadow-sm">
+                                    <button type="button" className="hidden sm:flex p-2 text-slate-400 hover:text-primary transition-colors">
                                         <span className="material-symbols-outlined">add_circle</span>
                                     </button>
                                     <input
-                                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-900 dark:text-slate-100 outline-none"
+                                        className="flex-1 bg-transparent border-none focus:ring-0 text-[16px] md:text-sm text-slate-900 dark:text-slate-100 outline-none w-full px-2"
                                         placeholder={`Message ${activeUser.email}...`}
                                         type="text"
                                         value={inputMessage}
                                         onChange={(e) => setInputMessage(e.target.value)}
+                                        autoComplete="off"
                                     />
-                                    <div className="flex items-center gap-1">
-                                        <button type="button" className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                    <div className="flex items-center gap-0 md:gap-1 shrink-0">
+                                        <button type="button" className="hidden sm:flex p-2 text-slate-400 hover:text-primary transition-colors">
                                             <span className="material-symbols-outlined">mood</span>
                                         </button>
-                                        <button type="button" className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                        <button type="button" className="hidden sm:flex p-2 text-slate-400 hover:text-primary transition-colors">
                                             <span className="material-symbols-outlined">mic</span>
                                         </button>
                                         <button
