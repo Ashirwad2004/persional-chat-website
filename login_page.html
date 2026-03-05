@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modern Split-Screen Login Page Variant 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b2bee",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+body {
+    font-family: "Plus Jakarta Sans", sans-serif
+    }
+.bg-login-image {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB-qW6z4udQQ9uHSkSYhMmzcuC7BrFrd_QHqD4xWZtNr2hrcPpPfUUw17PCY-_7J9eDqoroJA1WvyklLARb7HqNi58lGomlQ7IGdfyzZtw7KUdNC-Sqp_RavZTXOT9NtLfrw-78u58nQYDALNTJlu6phbSYTD3iCJXj5YTdGTAyKOwCPXG7gTEEE_PV7uBtkAKvDU9uPM9PAo4s6aL9zPoSe-PUO38-HLAtV7q4S_bkS99KPKfq7YE9Yl7AtVKk-THgbb0Hv3sC4XjF)
+    }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col @container overflow-hidden">
+<div class="flex h-screen w-full flex-row">
+<!-- Left Side: Aesthetic Visual -->
+<div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary/10">
+<div class="absolute inset-0 bg-cover bg-center bg-login-image" data-alt="Peaceful abstract gradient landscape with soft blue and purple tones">
+</div>
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/60 to-transparent"></div>
+<div class="relative z-10 flex flex-col justify-between p-16 w-full h-full text-white">
+<div class="flex items-center gap-3">
+<div class="bg-white/20 backdrop-blur-md p-2 rounded-lg">
+<span class="material-symbols-outlined text-3xl">forum</span>
+</div>
+<span class="text-2xl font-bold tracking-tight">NexusChat</span>
+</div>
+<div class="max-w-md">
+<h2 class="text-4xl font-extrabold leading-tight mb-4">Connecting people in a simpler way.</h2>
+<p class="text-lg text-white/80">Experience the next generation of personal messaging. Clean, secure, and built for your community.</p>
+</div>
+<div class="flex gap-4">
+<div class="flex -space-x-3">
+<img class="h-10 w-10 rounded-full border-2 border-white" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcdQ5n6Tdq2GjdDMU0enkHTHdCvqm0_evFen1JsPNgEdz5IMuKC7kpq325qyRL8KJgsWJowLPnLURmd6YboOvHycjDdI8WTmMryV4S0z1AoLxpPVNkiPZEVgMNTpVUc_02OocaYM4z_-JFG3onyqlLvRN3_olAFNEsURin9yYSJdbsYe6Rc78ya0MFX093IpEfltu3V8l9HCdwMLEv81kj0oZZ4V4If2df_XkOwX-6HEl21jSZe97jEWlZsEfzvCKOaKOESfgysXb9"/>
+<img class="h-10 w-10 rounded-full border-2 border-white" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaz_X-zq70qCYvbhqbf3McWeeVnwO1ZyKPkk9zLx_MR9n9HeifAigmb3WV5IKgtUcrcurG8Ys52P2wiIdQd9fY8KW0DArqIwFARvIHFAnGut7gT31dVoiaotP_nz9mIu3DYuSqn-NHXkpRDLfIjQvpKOrmEKye4_XHCnlp9AbyVU-dbQSIFW1dCrkAz-PWWve_oghtQwRIqCuWE845UfGgPppRhOabsWcOvHV43dfhLzDK-rL-nSiwOBQYDjlAXKsRSJRLpyrT5fVF"/>
+<img class="h-10 w-10 rounded-full border-2 border-white" data-alt="User avatar 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-ArZd6byCqCtvvcGZeNyvxlE8ar3H3xVPx8IJCmbFJ-dq3fkmnrOo3LfKMLL943fx8s3dpCv6xw3mysGiB0K_KM9GC4uOfotCuQt2v1P2kJZIAIfCHdj-hxQl8ojYCnPtV5YdL-N1FINFOJPs76DBhmW6LK7ivZbhjlE3g4JWEeMQOI0E24zts5b_t_Hy3_tX4yx0pIsAM27c1cgIy0DjzupP_dF8imQVoAihi72bMHrrymhwMc590sQiR4H0-c2zu7YsVuFx2F4A"/>
+</div>
+<div class="text-sm font-medium flex items-center">
+                        Joined by 10k+ people this week
+                    </div>
+</div>
+</div>
+</div>
+<!-- Right Side: Login Area -->
+<div class="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-white dark:bg-background-dark">
+<div class="w-full max-w-[440px] flex flex-col gap-8">
+<!-- Welcome Header -->
+<div class="flex flex-col gap-2">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-tight">
+                        Welcome Back!
+                    </h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal">
+                        Please enter your details to stay connected with your community.
+                    </p>
+</div>
+<!-- Form Section -->
+<div class="flex flex-col gap-5">
+<!-- Social Login -->
+<div class="grid grid-cols-2 gap-4 mb-2">
+<button class="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<img class="w-5 h-5" data-alt="Google logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGHCFMbYrNqOgUst9yF5yNFM-qafn5bwop2f43KTsyR4OvURZAyoAFKmm-3LEX7glxycXSCjExBgttRTj9S_uR-Zp_5tRGL61XL5MYf8fJJlWP2jGcHyNBvtFcim13ZTnGQHRaZafE_K5IPKH4nyVqUQ79z10k_CbbfKr9lzBo8tXDRU9QLEz3Kr271ECnAGz7xK-Gu6cOh4nLj2C6bRMxHM-cfTlr3prJPvkqlRsqqR8ExP8XDth94ewG1UdSajQbZqu45gqTjetX"/>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Google</span>
+</button>
+<button class="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">ios</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Apple</span>
+</button>
+</div>
+<div class="relative flex items-center justify-center">
+<div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+<span class="absolute bg-white dark:bg-background-dark px-4 text-xs font-medium text-slate-400 uppercase tracking-widest">or continue with email</span>
+</div>
+<!-- Input: Email -->
+<div class="flex flex-col gap-2">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-semibold">Email Address</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[20px]">alternate_email</span>
+</div>
+<input class="flex w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 h-14 pl-12 pr-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-base" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<!-- Input: Password -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-semibold">Password</label>
+<a class="text-primary text-xs font-bold hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[20px]">lock_open</span>
+</div>
+<input class="flex w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 h-14 pl-12 pr-12 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-base" placeholder="••••••••" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Checkbox -->
+<div class="flex items-center justify-between py-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="h-5 w-5 rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary/20 bg-transparent" type="checkbox"/>
+<span class="text-slate-600 dark:text-slate-400 text-sm font-medium">Keep me logged in</span>
+</label>
+</div>
+<!-- Action Button -->
+<button class="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-primary text-white text-base font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:scale-[1.01] active:scale-[0.98]">
+                        Sign In
+                    </button>
+</div>
+<!-- Footer Sign Up -->
+<div class="text-center">
+<p class="text-slate-500 dark:text-slate-400 text-sm">
+                        Don't have an account? 
+                        <a class="text-primary font-bold hover:underline ml-1" href="#">Create an account</a>
+</p>
+</div>
+<!-- Bottom Policy -->
+<div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-center gap-x-6 gap-y-2">
+<a class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" href="#">Privacy Policy</a>
+<a class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" href="#">Terms of Service</a>
+<a class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" href="#">Help Center</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
