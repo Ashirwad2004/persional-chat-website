@@ -1,20 +1,42 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-export function useWebSocket(url: string) {
-    const [messages, setMessages] = useState<string[]>([]);
+export interface ChatMessage {
+    id?: number;
+    sender_id: number;
+    receiver_id: number;
+    content: string;
+    timestamp?: string;
+}
+
+export function useWebSocket(url: string, onMessageReceived?: (msg: ChatMessage) => void) {
     const [isConnected, setIsConnected] = useState(false);
     const ws = useRef<WebSocket | null>(null);
 
     useEffect(() => {
-        ws.current = new WebSocket(url);
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            console.error("No access token found for WebSocket connection.");
+            return;
+        }
+
+        // Connect with the JWT token in the query params to authenticate the socket
+        const wsUrl = `${url}?token=${token}`;
+        ws.current = new WebSocket(wsUrl);
 
         ws.current.onopen = () => {
             setIsConnected(true);
-            console.log('Connected to chat server');
+            console.log('Connected to authenticated chat server');
         };
 
         ws.current.onmessage = (event) => {
-            setMessages((prev) => [...prev, event.data]);
+            try {
+                const msg: ChatMessage = JSON.parse(event.data);
+                if (onMessageReceived) {
+                    onMessageReceived(msg);
+                }
+            } catch (error) {
+                console.error('Failed to parse incoming WebSocket message', event.data);
+            }
         };
 
         ws.current.onclose = () => {
@@ -25,13 +47,17 @@ export function useWebSocket(url: string) {
         return () => {
             ws.current?.close();
         };
-    }, [url]);
+    }, [url, onMessageReceived]);
 
-    const sendMessage = (message: string) => {
+    const sendMessage = useCallback((receiverId: number, content: string) => {
         if (ws.current && isConnected) {
-            ws.current.send(message);
+            const payload = JSON.stringify({
+                receiver_id: receiverId,
+                content: content
+            });
+            ws.current.send(payload);
         }
-    };
+    }, [isConnected]);
 
-    return { messages, isConnected, sendMessage };
+    return { isConnected, sendMessage };
 }
