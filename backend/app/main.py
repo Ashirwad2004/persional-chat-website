@@ -2,16 +2,24 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import time
 
+from app.core.database import engine, Base
+from app.api.auth import router as auth_router
+
+# Create all tables in the database (SQLite)
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="NexusChat API")
 
 # Configure CORS for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # allow all locally for now
+    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 class ConnectionManager:
     def __init__(self):

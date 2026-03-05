@@ -1,43 +1,40 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-export default function Login() {
+export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation();
 
-    // Message from Signup redirect
-    const successMessage = location.state?.message;
-
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
         setIsLoading(true);
-
         try {
-            const formData = new URLSearchParams();
-            formData.append('username', email);
-            formData.append('password', password);
-
-            const response = await fetch('http://127.0.0.1:8000/auth/login', {
+            const response = await fetch('http://127.0.0.1:8000/auth/register', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: formData,
+                body: JSON.stringify({ email, password }),
             });
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.detail || 'Login failed');
+                throw new Error(data.detail || 'Failed to register');
             }
 
-            const data = await response.json();
-            localStorage.setItem('access_token', data.access_token);
-            navigate('/chat');
+            // Success, redirect to login
+            navigate('/login', { state: { message: "Account created successfully! Please log in." } });
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -62,7 +59,7 @@ export default function Login() {
                         </div>
 
                         <div className="max-w-md">
-                            <h2 className="text-4xl font-extrabold leading-tight mb-4">Connecting people in a simpler way.</h2>
+                            <h2 className="text-4xl font-extrabold leading-tight mb-4">Join the conversation today.</h2>
                             <p className="text-lg text-white/80">Experience the next generation of personal messaging. Clean, secure, and built for your community.</p>
                         </div>
 
@@ -79,33 +76,21 @@ export default function Login() {
                     </div>
                 </div>
 
-                {/* Right Side: Login Area */}
+                {/* Right Side: Signup Area */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-white dark:bg-background-dark">
                     <div className="w-full max-w-[440px] flex flex-col gap-8">
                         {/* Welcome Header */}
                         <div className="flex flex-col gap-2">
                             <h1 className="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-tight">
-                                Welcome Back!
+                                Create an Account
                             </h1>
                             <p className="text-slate-500 dark:text-slate-400 text-base font-normal">
-                                Please enter your details to stay connected with your community.
+                                Sign up to get started with NexusChat.
                             </p>
                         </div>
 
                         {/* Form Section */}
-                        <form onSubmit={handleLogin} className="flex flex-col gap-5">
-                            {successMessage && (
-                                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-sm font-medium border border-green-200 dark:border-green-500/20">
-                                    {successMessage}
-                                </div>
-                            )}
-
-                            {error && (
-                                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium border border-red-200 dark:border-red-500/20">
-                                    {error}
-                                </div>
-                            )}
-
+                        <form onSubmit={handleSignup} className="flex flex-col gap-5">
                             {/* Social Login */}
                             <div className="grid grid-cols-2 gap-4 mb-2">
                                 <button type="button" className="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-0.5 shadow-sm hover:shadow">
@@ -120,8 +105,14 @@ export default function Login() {
 
                             <div className="relative flex items-center justify-center">
                                 <div className="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-                                <span className="absolute bg-white dark:bg-background-dark px-4 text-xs font-medium text-slate-400 uppercase tracking-widest">or continue with email</span>
+                                <span className="absolute bg-white dark:bg-background-dark px-4 text-xs font-medium text-slate-400 uppercase tracking-widest">or sign up with email</span>
                             </div>
+
+                            {error && (
+                                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium border border-red-200 dark:border-red-500/20">
+                                    {error}
+                                </div>
+                            )}
 
                             {/* Input: Email */}
                             <div className="flex flex-col gap-2 relative">
@@ -143,10 +134,7 @@ export default function Login() {
 
                             {/* Input: Password */}
                             <div className="flex flex-col gap-2 relative">
-                                <div className="flex justify-between items-center ml-1">
-                                    <label className="text-slate-700 dark:text-slate-300 text-sm font-semibold">Password</label>
-                                    <a href="#" className="text-primary text-xs font-bold hover:underline">Forgot password?</a>
-                                </div>
+                                <label className="text-slate-700 dark:text-slate-300 text-sm font-semibold ml-1">Password</label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
                                         <span className="material-symbols-outlined text-[20px]">lock_open</span>
@@ -159,31 +147,38 @@ export default function Login() {
                                         className="flex w-full rounded-xl border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 h-14 pl-12 pr-12 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-base shadow-sm hover:bg-slate-50 dark:hover:bg-slate-900/60"
                                         placeholder="••••••••"
                                     />
-                                    <button type="button" className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                                        <span className="material-symbols-outlined text-[20px]">visibility</span>
-                                    </button>
                                 </div>
                             </div>
 
-                            {/* Checkbox */}
-                            <div className="flex items-center justify-between py-1 mt-1">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <input type="checkbox" className="h-5 w-5 rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary/20 bg-white dark:bg-slate-900 transition-all checked:hover:bg-primary/90" />
-                                    <span className="text-slate-600 dark:text-slate-400 text-sm font-medium group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">Keep me logged in</span>
-                                </label>
+                            {/* Input: Confirm Password */}
+                            <div className="flex flex-col gap-2 relative">
+                                <label className="text-slate-700 dark:text-slate-300 text-sm font-semibold ml-1">Confirm Password</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                                        <span className="material-symbols-outlined text-[20px]">lock_open</span>
+                                    </div>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="flex w-full rounded-xl border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 h-14 pl-12 pr-12 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-base shadow-sm hover:bg-slate-50 dark:hover:bg-slate-900/60"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
                             </div>
 
                             {/* Action Button */}
                             <button type="submit" disabled={isLoading} className="mt-2 flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-gradient-to-r from-primary to-primary/90 text-white text-base font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none">
-                                {isLoading ? 'Signing In...' : 'Sign In'}
+                                {isLoading ? 'Creating Account...' : 'Sign Up'}
                             </button>
                         </form>
 
                         {/* Footer Sign Up */}
                         <div className="text-center">
                             <p className="text-slate-500 dark:text-slate-400 text-sm">
-                                Don't have an account?
-                                <Link to="/signup" className="text-primary font-bold hover:underline ml-1">Create an account</Link>
+                                Already have an account?
+                                <Link to="/login" className="text-primary font-bold hover:underline ml-1">Sign in</Link>
                             </p>
                         </div>
 
