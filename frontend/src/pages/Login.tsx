@@ -1,48 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
     const location = useLocation();
+    const { login, isLoading, error } = useAuth();
 
     // Message from Signup redirect
     const successMessage = location.state?.message;
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setIsLoading(true);
-
-        try {
-            const formData = new URLSearchParams();
-            formData.append('username', email);
-            formData.append('password', password);
-
-            const response = await fetch('http://127.0.0.1:8000/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Login failed');
-            }
-
-            const data = await response.json();
-            localStorage.setItem('access_token', data.access_token);
-            navigate('/chat');
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
+        await login(email, password);
     };
 
     return (

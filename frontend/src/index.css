@@ -15,3 +15,14 @@
 .bg-login-image {
   background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB-qW6z4udQQ9uHSkSYhMmzcuC7BrFrd_QHqD4xWZtNr2hrcPpPfUUw17PCY-_7J9eDqoroJA1WvyklLARb7HqNi58lGomlQ7IGdfyzZtw7KUdNC-Sqp_RavZTXOT9NtLfrw-78u58nQYDALNTJlu6phbSYTD3iCJXj5YTdGTAyKOwCPXG7gTEEE_PV7uBtkAKvDU9uPM9PAo4s6aL9zPoSe-PUO38-HLAtV7q4S_bkS99KPKfq7YE9Yl7AtVKk-THgbb0Hv3sC4XjF');
 }
+
+@layer utilities {
+  .gradient-bg {
+    background: radial-gradient(circle at top left, rgba(75, 43, 238, 0.05), transparent),
+      radial-gradient(circle at bottom right, rgba(75, 43, 238, 0.03), transparent);
+  }
+
+  .glass-panel {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-800/20;
+  }
+}

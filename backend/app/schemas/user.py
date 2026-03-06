@@ -10,6 +10,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    profile_picture_url: Optional[str] = None
 
     class Config:
         from_attributes = True

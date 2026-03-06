@@ -1,46 +1,28 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
+    const [localError, setLocalError] = useState('');
+
+    const { signup, isLoading, error: authError } = useAuth();
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        setLocalError('');
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setLocalError("Passwords do not match");
             return;
         }
 
-        setIsLoading(true);
-        try {
-            const response = await fetch('http://127.0.0.1:8000/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Failed to register');
-            }
-
-            // Success, redirect to login
-            navigate('/login', { state: { message: "Account created successfully! Please log in." } });
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
+        await signup(email, password);
     };
+
+    const displayError = localError || authError;
 
     return (
         <div className="relative flex min-h-screen w-full flex-col @container overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
@@ -108,9 +90,9 @@ export default function Signup() {
                                 <span className="absolute bg-white dark:bg-background-dark px-4 text-xs font-medium text-slate-400 uppercase tracking-widest">or sign up with email</span>
                             </div>
 
-                            {error && (
+                            {displayError && (
                                 <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium border border-red-200 dark:border-red-500/20">
-                                    {error}
+                                    {displayError}
                                 </div>
                             )}
 
