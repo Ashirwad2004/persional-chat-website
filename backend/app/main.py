@@ -1,6 +1,8 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import json
+import os
 from jose import jwt, JWTError
 
 from app.core.security import SECRET_KEY, ALGORITHM
@@ -31,6 +33,10 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(users_router, prefix="/users", tags=["users"])
 app.include_router(messages_router, prefix="/messages", tags=["messages"])
 
+# Mount static files folder dynamically
+os.makedirs("uploads/avatars", exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 class ConnectionManager:
     def __init__(self):
         # Maps user_id to active WebSocket connection
@@ -39,14 +45,29 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, user_id: int):
         await websocket.accept()
         self.active_connections[user_id] = websocket
+        await self.broadcast_presence(user_id, True)
 
-    def disconnect(self, user_id: int):
+    async def disconnect(self, user_id: int):
         if user_id in self.active_connections:
             del self.active_connections[user_id]
+            await self.broadcast_presence(user_id, False)
 
     async def send_personal_message(self, message: str, user_id: int):
         if user_id in self.active_connections:
             await self.active_connections[user_id].send_text(message)
+
+    async def broadcast_presence(self, user_id: int, is_online: bool):
+        message = json.dumps({
+            "type": "presence",
+            "user_id": user_id,
+            "is_online": is_online
+        })
+        for uid, connection in self.active_connections.items():
+            if uid != user_id:
+                try:
+                    await connection.send_text(message)
+                except Exception:
+                    pass
 
 manager = ConnectionManager()
 
@@ -80,38 +101,69 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
             data = await websocket.receive_text()
             try:
                 message_data = json.loads(data)
+                msg_type = message_data.get("type", "chat_message")
                 receiver_id = message_data.get("receiver_id")
-                content = message_data.get("content")
                 
-                if receiver_id and content:
-                    # 1. Save message to database
-                    new_msg = Message(sender_id=user.id, receiver_id=receiver_id, content=content)
-                    db.add(new_msg)
-                    db.commit()
-                    db.refresh(new_msg)
-                    
+                if not receiver_id:
+                    continue
+                
+                if msg_type == "chat_message":
+                    content = message_data.get("content")
+                    if content:
+                        # 1. Save message to database
+                        new_msg = Message(sender_id=user.id, receiver_id=receiver_id, content=content)
+                        db.add(new_msg)
+                        db.commit()
+                        db.refresh(new_msg)
+                        
+                        response_payload = {
+                            "type": "chat_message",
+                            "message": {
+                                "id": new_msg.id,
+                                "sender_id": user.id,
+                                "receiver_id": receiver_id,
+                                "content": content,
+                                "timestamp": new_msg.timestamp.isoformat() if new_msg.timestamp else None,
+                                "is_read": False
+                            }
+                        }
+                        response_str = json.dumps(response_payload)
+                        
+                        # 2. Route message to receiver (if online)
+                        await manager.send_personal_message(response_str, receiver_id)
+                        
+                        # 3. Echo message back to sender (for UI confirmation)
+                        if user.id != receiver_id:
+                            await manager.send_personal_message(response_str, user.id)
+
+                elif msg_type == "typing":
                     response_payload = {
-                        "id": new_msg.id,
+                        "type": "typing",
                         "sender_id": user.id,
-                        "receiver_id": receiver_id,
-                        "content": content,
-                        "timestamp": new_msg.timestamp.isoformat() if new_msg.timestamp else None
+                        "receiver_id": receiver_id
                     }
-                    response_str = json.dumps(response_payload)
-                    
-                    # 2. Route message to receiver (if online)
-                    await manager.send_personal_message(response_str, receiver_id)
-                    
-                    # 3. Echo message back to sender (for UI confirmation)
-                    # We only echo if receiver != sender, or we'd double send.
-                    if user.id != receiver_id:
-                        await manager.send_personal_message(response_str, user.id)
+                    await manager.send_personal_message(json.dumps(response_payload), receiver_id)
+
+                elif msg_type == "read_receipt":
+                    message_ids = message_data.get("message_ids", [])
+                    if message_ids:
+                        db.query(Message).filter(Message.id.in_(message_ids)).update({"is_read": True}, synchronize_session=False)
+                        db.commit()
+                        
+                        response_payload = {
+                            "type": "read_receipt",
+                            "sender_id": user.id,
+                            "receiver_id": receiver_id,
+                            "message_ids": message_ids
+                        }
+                        await manager.send_personal_message(json.dumps(response_payload), receiver_id)
+                        
             except json.JSONDecodeError:
                 pass # Ignore malformed JSON messages
                 
     except WebSocketDisconnect:
         if 'user' in locals():
-            manager.disconnect(user.id)
+            await manager.disconnect(user.id)
     except JWTError:
         await websocket.close(code=1008)
     finally:
