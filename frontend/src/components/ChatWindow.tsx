@@ -4,29 +4,82 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { useMessages } from '../hooks/useMessages';
 
 export default function ChatWindow() {
-    const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages } = useChatStore();
+    const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages } = useChatStore();
     const { sendReadReceipt } = useWebSocket('ws://localhost:8000/ws/chat');
-    const { markAsRead, deleteChatHistory } = useMessages();
+    const { markAsRead, deleteChatHistory, loadMoreMessages } = useMessages();
     const bottomRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const observerTarget = useRef<HTMLDivElement>(null);
+    const isFetchingRef = useRef(false);
+    const prevScrollHeightRef = useRef<number>(0);
+    const lastMessageIdRef = useRef<number | null>(null);
 
     const getInitials = (email: string) => email.substring(0, 2).toUpperCase();
     const formatTime = (isoString?: string) => {
         if (!isoString) return 'Just now';
-        return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let safeString = isoString.replace(' ', 'T');
+        if (!safeString.endsWith('Z') && !safeString.includes('+')) {
+            safeString += 'Z';
+        }
+        return new Date(safeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
+
+    // Infinite Scroll IntersectionObserver
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMoreMessages && !isFetchingRef.current && activeUser && messages.length > 0) {
+                    isFetchingRef.current = true;
+
+                    const container = scrollContainerRef.current;
+                    prevScrollHeightRef.current = container?.scrollHeight || 0;
+
+                    loadMoreMessages(activeUser.id, messages[0].id).then(() => {
+                        setTimeout(() => {
+                            if (container) {
+                                container.scrollTop = container.scrollHeight - prevScrollHeightRef.current;
+                            }
+                            isFetchingRef.current = false;
+                        }, 50);
+                    });
+                }
+            },
+            { root: null, threshold: 0.1 }
+        );
+
+        const target = observerTarget.current;
+        if (target) observer.observe(target);
+
+        return () => {
+            if (target) observer.unobserve(target);
+        };
+    }, [hasMoreMessages, activeUser, messages, loadMoreMessages]);
 
     // Auto-scroll and read receipts
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (!messages.length) return;
 
-        if (messages.length > 0 && activeUser) {
-            const lastMsg = messages[messages.length - 1];
-            if (lastMsg.sender_id === activeUser.id && !lastMsg.is_read) {
-                sendReadReceipt(activeUser.id, [lastMsg.id]);
-                markAsRead(activeUser.id);
-            }
+        const lastMsg = messages[messages.length - 1];
+
+        // Only scroll to bottom if the newest message at the bottom changed (e.g., initial load or incoming new message)
+        if (lastMessageIdRef.current !== lastMsg.id) {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            lastMessageIdRef.current = lastMsg.id;
+        }
+
+        if (activeUser && lastMsg.sender_id === activeUser.id && !lastMsg.is_read) {
+            sendReadReceipt(activeUser.id, [lastMsg.id]);
+            markAsRead(activeUser.id);
         }
     }, [messages, activeUser, sendReadReceipt, markAsRead]);
+
+    // Reset scroll memory and fetching ref when changing users
+    useEffect(() => {
+        if (activeUser) {
+            lastMessageIdRef.current = null;
+            isFetchingRef.current = false;
+        }
+    }, [activeUser]);
 
     const handleDeleteChat = async () => {
         if (!activeUser) return;
@@ -97,10 +150,21 @@ export default function ChatWindow() {
             </header>
 
             {/* Messages Stream */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-20 md:pb-8">
-                <div className="flex justify-center">
-                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">Start of Conversation</span>
-                </div>
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-20 md:pb-8">
+                {hasMoreMessages ? (
+                    <div ref={observerTarget} className="flex justify-center h-8 items-center">
+                        {isFetchingRef.current && (
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+                                <span className="text-xs text-slate-400 font-medium">Loading history...</span>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex justify-center">
+                        <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">Start of Conversation</span>
+                    </div>
+                )}
 
                 {messages.map((msg, index) => {
                     const isMine = msg.sender_id === currentUser?.id;
@@ -115,7 +179,7 @@ export default function ChatWindow() {
                                     <span>{formatTime(msg.timestamp)}</span>
                                     {isMine && (
                                         <span className={`material-symbols-outlined text-[14px] ${msg.is_read ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'}`}>
-                                            done_all
+                                            {msg.is_read ? 'done_all' : 'done'}
                                         </span>
                                     )}
                                 </div>

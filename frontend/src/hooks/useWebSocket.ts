@@ -110,25 +110,42 @@ export function useWebSocket(url: string) {
         const token = localStorage.getItem('access_token');
         if (!token) return;
 
-        if (!wsInstance || wsInstance.readyState === WebSocket.CLOSED) {
-            const wsUrl = `${url}?token=${token}`;
-            wsInstance = new WebSocket(wsUrl);
+        let reconnectTimer: ReturnType<typeof setTimeout>;
 
-            wsInstance.onopen = () => {
-                listeners.forEach(l => l(true));
-            };
+        const connect = () => {
+            if (!wsInstance || wsInstance.readyState === WebSocket.CLOSED) {
+                const wsUrl = `${url}?token=${token}`;
+                wsInstance = new WebSocket(wsUrl);
 
-            wsInstance.onclose = () => {
-                listeners.forEach(l => l(false));
-                wsInstance = null;
-            };
+                wsInstance.onopen = () => {
+                    listeners.forEach(l => l(true));
+                };
 
-            wsInstance.onmessage = handleMessage;
-        }
+                wsInstance.onclose = (event) => {
+                    listeners.forEach(l => l(false));
+                    wsInstance = null;
+
+                    if (event.code === 1008) {
+                        localStorage.removeItem('access_token');
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    // Auto-reconnect after connection drops
+                    reconnectTimer = setTimeout(() => {
+                        connect();
+                    }, 3000); // retry every 3s
+                };
+
+                wsInstance.onmessage = handleMessage;
+            }
+        };
+
+        connect();
 
         return () => {
             listeners.delete(handleStatusChange);
-            // We do NOT close the singleton WebSocket here, as it services the whole app
+            clearTimeout(reconnectTimer);
         };
     }, [url]);
 

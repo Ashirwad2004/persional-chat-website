@@ -116,6 +116,15 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                         db.commit()
                         db.refresh(new_msg)
                         
+                        
+                        timestamp_val = new_msg.timestamp
+                        if hasattr(timestamp_val, 'isoformat'):
+                            timestamp_iso = timestamp_val.isoformat()
+                        elif timestamp_val:
+                            timestamp_iso = str(timestamp_val)
+                        else:
+                            timestamp_iso = None
+
                         response_payload = {
                             "type": "chat_message",
                             "message": {
@@ -123,7 +132,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                                 "sender_id": user.id,
                                 "receiver_id": receiver_id,
                                 "content": content,
-                                "timestamp": new_msg.timestamp.isoformat() if new_msg.timestamp else None,
+                                "timestamp": timestamp_iso,
                                 "is_read": False
                             }
                         }
@@ -160,7 +169,12 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                         
             except json.JSONDecodeError:
                 pass # Ignore malformed JSON messages
-                
+            except Exception as e:
+                import traceback
+                error_str = traceback.format_exc()
+                with open("exception.log", "a") as f:
+                    f.write(error_str + "\n")
+                print(f"WS Handling Error: {e}")
     except WebSocketDisconnect:
         if 'user' in locals():
             await manager.disconnect(user.id)

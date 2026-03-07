@@ -20,11 +20,26 @@ export function useMessages() {
 
     const fetchChatHistory = useCallback(async (userId: number) => {
         try {
-            const data = await messagesApi.getChatHistory(userId);
+            const data = await messagesApi.getChatHistory(userId, undefined, 20);
             setMessages(data);
+            useChatStore.getState().setHasMoreMessages(data.length === 20);
             return data;
         } catch (error) {
             console.error("Failed to fetch chat history", error);
+            return [];
+        }
+    }, [setMessages]);
+
+    const loadMoreMessages = useCallback(async (userId: number, cursor: number) => {
+        try {
+            const data = await messagesApi.getChatHistory(userId, cursor, 20);
+            if (data.length > 0) {
+                setMessages(prev => [...data, ...prev]);
+            }
+            useChatStore.getState().setHasMoreMessages(data.length === 20);
+            return data;
+        } catch (error) {
+            console.error("Failed to load more messages", error);
             return [];
         }
     }, [setMessages]);
@@ -50,5 +65,5 @@ export function useMessages() {
         }
     }, [setMessages]);
 
-    return { fetchSummaries, fetchChatHistory, markAsRead, deleteChatHistory };
+    return { fetchSummaries, fetchChatHistory, loadMoreMessages, markAsRead, deleteChatHistory };
 }

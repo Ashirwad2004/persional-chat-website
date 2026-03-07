@@ -24,6 +24,7 @@ interface ChatState {
     onlineUsers: Set<number>;
     typingUsers: Set<number>;
     summaries: Record<number, { last_message: string; unread_count: number }>;
+    hasMoreMessages: boolean;
 
     setCurrentUser: (user: User | null) => void;
     setUsers: (users: User[]) => void;
@@ -33,6 +34,7 @@ interface ChatState {
     setOnlineUsers: (updater: (prev: Set<number>) => Set<number>) => void;
     setTypingUsers: (updater: (prev: Set<number>) => Set<number>) => void;
     setSummaries: (updater: (prev: Record<number, { last_message: string; unread_count: number }>) => Record<number, { last_message: string; unread_count: number }>) => void;
+    setHasMoreMessages: (hasMore: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -43,6 +45,7 @@ export const useChatStore = create<ChatState>((set) => ({
     onlineUsers: new Set(),
     typingUsers: new Set(),
     summaries: {},
+    hasMoreMessages: true,
 
     setCurrentUser: (user) => set({ currentUser: user }),
     setUsers: (users) => set({ users }),
@@ -62,4 +65,5 @@ export const useChatStore = create<ChatState>((set) => ({
     setSummaries: (updater) => set((state) => ({
         summaries: updater(state.summaries)
     })),
+    setHasMoreMessages: (hasMore) => set({ hasMoreMessages: hasMore }),
 }));

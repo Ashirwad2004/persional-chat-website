@@ -7,10 +7,10 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    sender_id = Column(Integer, ForeignKey("users.id"))
-    receiver_id = Column(Integer, ForeignKey("users.id"))
+    sender_id = Column(Integer, ForeignKey("users.id"), index=True)
+    receiver_id = Column(Integer, ForeignKey("users.id"), index=True)
     content = Column(String)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     is_read = Column(Boolean, default=False)
 
     sender = relationship("User", foreign_keys=[sender_id], backref="sent_messages")
