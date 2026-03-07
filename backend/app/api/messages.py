@@ -48,14 +48,30 @@ def get_conversations_summary(db: Session = Depends(get_db), current_user: User 
             
     return list(summaries.values())
 
+from typing import List, Optional
+
 @router.get("/{other_user_id}", response_model=List[MessageResponse])
-def get_messages(other_user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    messages = db.query(Message).filter(
+def get_messages(
+    other_user_id: int, 
+    cursor: Optional[int] = None,
+    limit: int = 20,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Message).filter(
         or_(
             and_(Message.sender_id == current_user.id, Message.receiver_id == other_user_id),
             and_(Message.sender_id == other_user_id, Message.receiver_id == current_user.id)
         )
-    ).order_by(Message.timestamp.asc()).all()
+    )
+    
+    if cursor:
+        query = query.filter(Message.id < cursor)
+        
+    messages = query.order_by(Message.id.desc()).limit(limit).all()
+    
+    # Reverse to return in chronological order for the frontend
+    messages.reverse()
     return messages
 
 @router.put("/{other_user_id}/read")
