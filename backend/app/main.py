@@ -35,6 +35,7 @@ app.include_router(messages_router, prefix="/messages", tags=["messages"])
 
 # Mount static files folder dynamically
 os.makedirs("uploads/avatars", exist_ok=True)
+os.makedirs("uploads/audio", exist_ok=True)
 app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 class ConnectionManager:
