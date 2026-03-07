@@ -103,6 +103,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 message_data = json.loads(data)
                 msg_type = message_data.get("type", "chat_message")
                 receiver_id = message_data.get("receiver_id")
+                client_id = message_data.get("client_id")
                 
                 if not receiver_id:
                     continue
@@ -127,6 +128,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
 
                         response_payload = {
                             "type": "chat_message",
+                            "client_id": client_id,
                             "message": {
                                 "id": new_msg.id,
                                 "sender_id": user.id,

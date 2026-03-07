@@ -14,6 +14,8 @@ export interface ChatMessage {
     receiver_id: number;
     timestamp: string;
     is_read: boolean;
+    client_id?: string;
+    status?: 'pending' | 'sent' | 'error';
 }
 
 interface ChatState {
@@ -31,6 +33,7 @@ interface ChatState {
     setActiveUser: (user: User | null) => void;
     setMessages: (messages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
     addMessage: (message: ChatMessage) => void;
+    updateMessageStatus: (clientId: string, updatedMsg: Partial<ChatMessage>) => void;
     setOnlineUsers: (updater: (prev: Set<number>) => Set<number>) => void;
     setTypingUsers: (updater: (prev: Set<number>) => Set<number>) => void;
     setSummaries: (updater: (prev: Record<number, { last_message: string; unread_count: number }>) => Record<number, { last_message: string; unread_count: number }>) => void;
@@ -55,6 +58,11 @@ export const useChatStore = create<ChatState>((set) => ({
     })),
     addMessage: (message) => set((state) => ({
         messages: [...state.messages, message]
+    })),
+    updateMessageStatus: (clientId, updatedMsg) => set((state) => ({
+        messages: state.messages.map(msg =>
+            msg.client_id === clientId ? { ...msg, ...updatedMsg } : msg
+        )
     })),
     setOnlineUsers: (updater) => set((state) => ({
         onlineUsers: updater(state.onlineUsers)
