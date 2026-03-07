@@ -4,7 +4,7 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { useMessages } from '../hooks/useMessages';
 
 export default function ChatWindow() {
-    const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages } = useChatStore();
+    const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages, setReplyingTo } = useChatStore();
     const { sendReadReceipt } = useWebSocket('ws://localhost:8000/ws/chat');
     const { markAsRead, deleteChatHistory, loadMoreMessages } = useMessages();
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -169,11 +169,46 @@ export default function ChatWindow() {
                 {messages.map((msg, index) => {
                     const isMine = msg.sender_id === currentUser?.id;
 
+                    let displayContent = msg.content;
+                    let replyContext: { id: string, sender: string, snippet: string } | null = null;
+
+                    if (msg.content.startsWith('REPLY::')) {
+                        const parts = msg.content.split('::');
+                        if (parts.length >= 5) {
+                            replyContext = { id: parts[1], sender: parts[2], snippet: parts[3] };
+                            displayContent = parts.slice(4).join('::');
+                        }
+                    }
+
+                    const isAudio = displayContent.startsWith('AUDIO:');
+                    const audioUrl = isAudio ? displayContent.substring(6) : null;
+
                     return (
-                        <div key={msg.id || index} className={`flex gap-4 max-w-2xl ${isMine ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
+                        <div key={msg.id || index} className={`flex gap-4 max-w-2xl group ${isMine ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
+                            {/* Reply Action Button */}
+                            <div className={`hidden group-hover:flex items-center justify-center self-center px-2 `}>
+                                <button
+                                    onClick={() => setReplyingTo(msg)}
+                                    className="p-1.5 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
+                                    title="Reply to message"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">reply</span>
+                                </button>
+                            </div>
+
                             <div className={`flex flex-col gap-1.5 ${isMine ? 'items-end' : 'items-start'}`}>
                                 <div className={`p-4 rounded-2xl text-sm shadow-md leading-relaxed ${isMine ? 'bg-primary text-white rounded-tr-none shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'}`}>
-                                    {msg.content}
+                                    {replyContext && (
+                                        <div className={`mb-2 p-2 rounded-r-lg rounded-l-[4px] border-l-[4px] opacity-90 max-w-sm ${isMine ? 'bg-black/10 border-white/40' : 'bg-black/5 dark:bg-white/5 border-primary/40'}`}>
+                                            <div className="font-bold text-[11px] mb-0.5 opacity-80 truncate">{replyContext.sender}</div>
+                                            <div className="text-xs line-clamp-2 truncate max-w-full text-ellipsis overflow-hidden">{replyContext.snippet}</div>
+                                        </div>
+                                    )}
+                                    {isAudio ? (
+                                        <audio controls src={`http://localhost:8000${audioUrl}`} className="h-10 w-64 max-w-full rounded-lg" />
+                                    ) : (
+                                        displayContent
+                                    )}
                                 </div>
                                 <div className={`flex items-center gap-1 text-[10px] text-slate-400 ${isMine ? 'flex-row-reverse' : ''}`}>
                                     <span>{formatTime(msg.timestamp)}</span>

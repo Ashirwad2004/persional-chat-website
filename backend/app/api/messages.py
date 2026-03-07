@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func, desc
 from typing import List
+import os
+import uuid
+import shutil
 
 from app.core.database import get_db
 from app.models.message import Message
@@ -11,6 +14,10 @@ from app.api.deps import get_current_user
 from pydantic import BaseModel
 
 router = APIRouter()
+
+# Ensure uploads directories exist
+AUDIO_UPLOAD_DIR = "uploads/audio"
+os.makedirs(AUDIO_UPLOAD_DIR, exist_ok=True)
 
 class ConversationSummary(BaseModel):
     user_id: int
@@ -94,3 +101,26 @@ def delete_chat(other_user_id: int, db: Session = Depends(get_db), current_user:
 
     db.commit()
     return {"message": f"Successfully deleted {deleted_count} messages."}
+
+@router.post("/upload-audio")
+async def upload_audio(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Validate file type roughly
+    if not file.content_type.startswith("audio/") and not file.content_type.startswith("video/webm"):
+        raise HTTPException(status_code=400, detail="File must be an audio format")
+
+    # Generate unique filename securely
+    # Browsers typically send blob/webm for MediaRecorder audio
+    new_filename = f"{uuid.uuid4()}.webm"
+    file_path = os.path.join(AUDIO_UPLOAD_DIR, new_filename)
+
+    # Save incoming file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    audio_url = f"/api/uploads/audio/{new_filename}"
+
+    return {"url": audio_url}
