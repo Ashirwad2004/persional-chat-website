@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useUsers } from '../hooks/useUsers';
@@ -15,6 +15,7 @@ export default function Dashboard() {
 
     // Initialize WebSocket connection
     const { isConnected } = useWebSocket('ws://localhost:8000/ws/chat');
+    const wasConnectedRef = useRef(isConnected);
 
     // 1. Initial Data Loading (Me, Users, Summaries)
     useEffect(() => {
@@ -28,6 +29,17 @@ export default function Dashboard() {
             fetchChatHistory(activeUser.id);
         }
     }, [activeUser, fetchChatHistory]);
+
+    // 3. Sync missed data when WebSocket connection is restored
+    useEffect(() => {
+        if (isConnected && !wasConnectedRef.current && currentUser) {
+            fetchSummaries();
+            if (activeUser) {
+                fetchChatHistory(activeUser.id);
+            }
+        }
+        wasConnectedRef.current = isConnected;
+    }, [isConnected, currentUser, activeUser, fetchSummaries, fetchChatHistory]);
 
     // Helper to get initials from email
     const getInitials = (email: string) => {

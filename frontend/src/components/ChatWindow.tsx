@@ -178,8 +178,8 @@ export default function ChatWindow() {
                                 <div className={`flex items-center gap-1 text-[10px] text-slate-400 ${isMine ? 'flex-row-reverse' : ''}`}>
                                     <span>{formatTime(msg.timestamp)}</span>
                                     {isMine && (
-                                        <span className={`material-symbols-outlined text-[14px] ${msg.is_read ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'}`}>
-                                            {msg.is_read ? 'done_all' : 'done'}
+                                        <span className={`material-symbols-outlined text-[14px] ${msg.status === 'pending' ? 'text-slate-300 dark:text-slate-500 animate-pulse' : msg.is_read ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'}`}>
+                                            {msg.status === 'pending' ? 'schedule' : msg.is_read ? 'done_all' : 'done'}
                                         </span>
                                     )}
                                 </div>

@@ -7,6 +7,7 @@ export interface BaseEvent {
 
 export interface ChatMessageEvent extends BaseEvent {
     type: 'chat_message';
+    client_id?: string;
     message: ChatMessage;
 }
 
@@ -31,10 +32,18 @@ export interface ReadReceiptEvent extends BaseEvent {
 
 export type WsEvent = ChatMessageEvent | PresenceEvent | TypingEvent | ReadReceiptEvent;
 
+const generateUuid = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
 // Singleton WebSocket state
 let wsInstance: WebSocket | null = null;
 const listeners = new Set<(status: boolean) => void>();
 const typingTimeouts: Record<number, ReturnType<typeof setTimeout>> = {};
+let reconnectAttempts = 0;
 
 const handleMessage = (event: MessageEvent) => {
     try {
@@ -89,7 +98,15 @@ const handleMessage = (event: MessageEvent) => {
                 (msg.sender_id === activeUser.id && msg.receiver_id === currentUser?.id) ||
                 (msg.sender_id === currentUser?.id && msg.receiver_id === activeUser.id)
             )) {
-                store.addMessage(msg);
+                const existing = store.messages.find(m => m.client_id === data.client_id);
+                if (data.client_id && existing) {
+                    store.updateMessageStatus(data.client_id, {
+                        ...msg,
+                        status: 'sent'
+                    });
+                } else {
+                    store.addMessage(msg);
+                }
             }
         }
     } catch (error) {
@@ -119,6 +136,21 @@ export function useWebSocket(url: string) {
 
                 wsInstance.onopen = () => {
                     listeners.forEach(l => l(true));
+                    reconnectAttempts = 0; // Reset backoff
+
+                    // Flush offline queue
+                    const queueStr = localStorage.getItem('offline_queue');
+                    if (queueStr) {
+                        try {
+                            const queue = JSON.parse(queueStr);
+                            queue.forEach((payload: any) => {
+                                wsInstance?.send(JSON.stringify(payload));
+                            });
+                            localStorage.removeItem('offline_queue');
+                        } catch (e) {
+                            console.error('Failed to parse offline queue', e);
+                        }
+                    }
                 };
 
                 wsInstance.onclose = (event) => {
@@ -131,10 +163,12 @@ export function useWebSocket(url: string) {
                         return;
                     }
 
-                    // Auto-reconnect after connection drops
+                    // Auto-reconnect with exponential backoff
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                    reconnectAttempts++;
                     reconnectTimer = setTimeout(() => {
                         connect();
-                    }, 3000); // retry every 3s
+                    }, delay);
                 };
 
                 wsInstance.onmessage = handleMessage;
@@ -150,8 +184,36 @@ export function useWebSocket(url: string) {
     }, [url]);
 
     const sendChatMessage = useCallback((receiverId: number, content: string) => {
+        const clientId = generateUuid();
+        const payload = { type: 'chat_message', receiver_id: receiverId, content, client_id: clientId };
+
         if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
-            wsInstance.send(JSON.stringify({ type: 'chat_message', receiver_id: receiverId, content }));
+            wsInstance.send(JSON.stringify(payload));
+        } else {
+            // Save to persistent offline queue
+            const store = useChatStore.getState();
+            if (!store.currentUser) return;
+
+            const offlineMsg = {
+                id: Date.now(), // Temporary UI ID
+                content,
+                sender_id: store.currentUser.id,
+                receiver_id: receiverId,
+                timestamp: new Date().toISOString(),
+                is_read: false,
+                client_id: clientId,
+                status: 'pending' as const
+            };
+            store.addMessage(offlineMsg);
+
+            const queueStr = localStorage.getItem('offline_queue') || '[]';
+            try {
+                const queue = JSON.parse(queueStr);
+                queue.push(payload);
+                localStorage.setItem('offline_queue', JSON.stringify(queue));
+            } catch (e) {
+                localStorage.setItem('offline_queue', JSON.stringify([payload]));
+            }
         }
     }, [isConnected]);
 
