@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useChatStore } from '../store/chatStore';
 
@@ -6,6 +6,7 @@ export default function MessageInput() {
     const [inputMessage, setInputMessage] = useState('');
     const { activeUser, setSummaries } = useChatStore();
     const { isConnected, sendChatMessage, sendTyping } = useWebSocket('ws://localhost:8000/ws/chat');
+    const lastTypingTimeRef = useRef<number>(0);
 
     const handleSend = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +29,11 @@ export default function MessageInput() {
     const handleMessageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputMessage(e.target.value);
         if (activeUser) {
-            sendTyping(activeUser.id);
+            const now = Date.now();
+            if (now - lastTypingTimeRef.current > 2000) {
+                sendTyping(activeUser.id);
+                lastTypingTimeRef.current = now;
+            }
         }
     };
 
