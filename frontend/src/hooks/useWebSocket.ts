@@ -45,6 +45,25 @@ const listeners = new Set<(status: boolean) => void>();
 const typingTimeouts: Record<number, ReturnType<typeof setTimeout>> = {};
 let reconnectAttempts = 0;
 
+// Notification Sound (A simple discrete pop/ping)
+const NOTIFICATION_SOUND = 'data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+const playNotificationSound = () => {
+    try {
+        const audio = new Audio(NOTIFICATION_SOUND);
+        audio.volume = 0.5;
+        audio.play().catch(() => { });
+    } catch (e) { }
+};
+
+const sendPushNotification = (title: string, body: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const truncateBody = body.length > 50 ? body.substring(0, 50) + '...' : body;
+            new Notification(title, { body: truncateBody });
+        } catch (e) { }
+    }
+};
+
 const handleMessage = (event: MessageEvent) => {
     try {
         const data: WsEvent = JSON.parse(event.data);
@@ -84,11 +103,13 @@ const handleMessage = (event: MessageEvent) => {
             const currentUser = store.currentUser;
             const activeUser = store.activeUser;
 
+            const isFromOtherUser = msg.sender_id !== currentUser?.id;
+
             store.setSummaries(prev => ({
                 ...prev,
                 [msg.sender_id === currentUser?.id ? msg.receiver_id : msg.sender_id]: {
                     last_message: msg.content,
-                    unread_count: (msg.sender_id !== currentUser?.id && activeUser?.id !== msg.sender_id)
+                    unread_count: (isFromOtherUser && activeUser?.id !== msg.sender_id)
                         ? (prev[msg.sender_id]?.unread_count || 0) + 1
                         : 0
                 }
@@ -108,6 +129,16 @@ const handleMessage = (event: MessageEvent) => {
                     store.addMessage(msg);
                 }
             }
+
+            // Trigger Notifications if it's an incoming message
+            if (isFromOtherUser && (document.hidden || activeUser?.id !== msg.sender_id)) {
+                playNotificationSound();
+                let displaySnippet = msg.content;
+                if (displaySnippet.startsWith('AUDIO:')) displaySnippet = '🎵 Voice Message';
+                if (displaySnippet.startsWith('REPLY::')) displaySnippet = displaySnippet.split('::').slice(4).join('::');
+
+                sendPushNotification('New Message', displaySnippet);
+            }
         }
     } catch (error) {
         console.error('WebSocket parse error', event.data);
@@ -121,11 +152,15 @@ export function useWebSocket(url: string) {
         const handleStatusChange = (status: boolean) => setIsConnected(status);
         listeners.add(handleStatusChange);
 
-        // Initial state sync in case it connected before this component mounted
         setIsConnected(wsInstance?.readyState === WebSocket.OPEN);
 
         const token = localStorage.getItem('access_token');
         if (!token) return;
+
+        // Request Push Notification permission on connect
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
 
         let reconnectTimer: ReturnType<typeof setTimeout>;
 
