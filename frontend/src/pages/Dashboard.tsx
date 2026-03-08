@@ -54,8 +54,8 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="flex h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden w-full">
-            {/* Sidebar Navigation (Compact) */}
+        <div className="flex h-[100dvh] bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden w-full relative">
+            {/* Sidebar Navigation (Compact) - Hidden on Mobile */}
             <aside className="hidden md:flex w-20 border-r border-slate-200 dark:border-slate-800 flex-col items-center py-6 gap-8 bg-white dark:bg-background-dark/50 shrink-0">
                 <div className="bg-primary/10 p-3 rounded-xl text-primary">
                     <span className="material-symbols-outlined text-3xl">bubble_chart</span>
@@ -151,6 +151,30 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </aside>
+            )}
+
+            {/* Mobile Bottom Navigation Bar (Visible only on ChatList view) */}
+            {!activeUser && (
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center h-16 px-2 safe-area-pb">
+                    <button className="flex flex-col items-center justify-center w-full h-full text-primary gap-1">
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
+                        <span className="text-[10px] font-semibold">Chats</span>
+                    </button>
+                    <button className="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1">
+                        <span className="material-symbols-outlined">group</span>
+                        <span className="text-[10px] font-medium">Contacts</span>
+                    </button>
+                    <button className="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1">
+                        <span className="material-symbols-outlined">call</span>
+                        <span className="text-[10px] font-medium">Calls</span>
+                    </button>
+                    <button className="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1">
+                        <div className="relative">
+                            <span className="material-symbols-outlined">settings</span>
+                        </div>
+                        <span className="text-[10px] font-medium">Settings</span>
+                    </button>
+                </nav>
             )}
         </div>
     );

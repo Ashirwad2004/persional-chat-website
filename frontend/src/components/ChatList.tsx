@@ -1,15 +1,28 @@
 import { useChatStore } from '../store/chatStore';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useMessages } from '../hooks/useMessages';
 
 export default function ChatList() {
     const { currentUser, users, activeUser, setActiveUser, onlineUsers, typingUsers, summaries } = useChatStore();
     const { isConnected } = useWebSocket('ws://localhost:8000/ws/chat');
+    const { deleteChatHistory } = useMessages();
 
     const getInitials = (email: string) => email.substring(0, 2).toUpperCase();
 
+    const handleDeleteClick = async (e: React.MouseEvent, userId: number, email: string) => {
+        e.stopPropagation(); // Prevent the main row from firing an setActiveUser
+        const confirmClear = window.confirm(`Are you sure you want to delete all messages with ${email}?`);
+        if (confirmClear) {
+            await deleteChatHistory(userId);
+            if (activeUser?.id === userId) {
+                setActiveUser(null);
+            }
+        }
+    };
+
     return (
         <section className={`border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-background-dark shrink-0 h-full ${activeUser ? 'hidden md:flex w-80' : 'w-full md:w-80'}`}>
-            <div className="p-4 md:p-6">
+            <div className="p-4 md:p-6 pb-2 md:pb-6">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                     <div className="flex items-center gap-3">
                         <div className="md:hidden relative cursor-pointer" title="Your Profile">
@@ -29,12 +42,12 @@ export default function ChatList() {
                     <input className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-[16px] md:text-sm transition-all" placeholder="Search chats..." type="text" />
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 space-y-1">
+            <div className="flex-1 overflow-y-auto px-3 space-y-1 pb-20 md:pb-4">
                 {users.map(user => (
                     <div
                         key={user.id}
                         onClick={() => setActiveUser(user)}
-                        className={`flex items-center gap-4 p-3 rounded-xl shadow-sm border cursor-pointer transition-colors ${activeUser?.id === user.id ? 'bg-white dark:bg-slate-900 border-primary/30 dark:border-primary/30 ring-1 ring-primary/10' : 'bg-transparent border-transparent hover:bg-white/50 dark:hover:bg-slate-900/50 hover:border-slate-200 dark:hover:border-slate-800'}`}
+                        className={`group relative flex items-center gap-4 p-3 rounded-xl shadow-sm border cursor-pointer transition-colors ${activeUser?.id === user.id ? 'bg-white dark:bg-slate-900 border-primary/30 dark:border-primary/30 ring-1 ring-primary/10' : 'bg-transparent border-transparent hover:bg-white/50 dark:hover:bg-slate-900/50 hover:border-slate-200 dark:hover:border-slate-800'}`}
                     >
                         <div className="relative shrink-0">
                             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border border-primary/20">
@@ -65,6 +78,13 @@ export default function ChatList() {
                                 )}
                             </p>
                         </div>
+                        <button
+                            onClick={(e) => handleDeleteClick(e, user.id, user.email)}
+                            className="hidden group-hover:flex p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all absolute right-2 bg-white dark:bg-slate-900 shadow-sm border dark:border-slate-800"
+                            title="Delete Chat"
+                        >
+                            <span className="material-symbols-outlined text-lg">delete</span>
+                        </button>
                     </div>
                 ))}
                 {users.length === 0 && (
