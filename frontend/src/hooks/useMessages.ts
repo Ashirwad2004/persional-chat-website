@@ -60,10 +60,21 @@ export function useMessages() {
         try {
             await messagesApi.deleteChatHistory(userId);
             setMessages([]);
+            setSummaries(prev => {
+                const newSummaries = { ...prev };
+                if (newSummaries[userId]) {
+                    newSummaries[userId] = {
+                        ...newSummaries[userId],
+                        last_message: '',
+                        unread_count: 0
+                    };
+                }
+                return newSummaries;
+            });
         } catch (error) {
             console.error("Failed to delete chat history", error);
         }
-    }, [setMessages]);
+    }, [setMessages, setSummaries]);
 
     return { fetchSummaries, fetchChatHistory, loadMoreMessages, markAsRead, deleteChatHistory };
 }
