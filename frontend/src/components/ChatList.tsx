@@ -1,11 +1,11 @@
 import { useChatStore } from '../store/chatStore';
-import { useWebSocket } from '../hooks/useWebSocket';
 import { useMessages } from '../hooks/useMessages';
+import { useUsers } from '../hooks/useUsers';
 
 export default function ChatList() {
     const { currentUser, users, activeUser, setActiveUser, onlineUsers, typingUsers, summaries } = useChatStore();
-    const { isConnected } = useWebSocket('ws://localhost:8000/ws/chat');
     const { deleteChatHistory } = useMessages();
+    const { uploadAvatar } = useUsers();
 
     const getInitials = (email: string) => email.substring(0, 2).toUpperCase();
 
@@ -20,37 +20,50 @@ export default function ChatList() {
         }
     };
 
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            await uploadAvatar(file);
+        }
+    };
+
     return (
-        <section className={`border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-background-dark shrink-0 h-full ${activeUser ? 'hidden md:flex w-80' : 'w-full md:w-80'}`}>
-            <div className="p-4 md:p-6 pb-2 md:pb-6">
-                <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="md:hidden relative cursor-pointer" title="Your Profile">
-                            <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 ring-2 ring-primary/20">
-                                {currentUser ? getInitials(currentUser.email) : 'U'}
-                            </div>
-                            <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 ${isConnected ? 'bg-green-500' : 'bg-red-500'} border-2 border-slate-50 dark:border-background-dark rounded-full`}></div>
-                        </div>
-                        <h1 className="text-2xl font-bold font-display">Messages</h1>
+        <section className={`border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-wa-panel-dark shrink-0 h-full ${activeUser ? 'hidden md:flex w-[400px]' : 'w-full md:w-[400px]'}`}>
+            {/* Header */}
+            <div className="bg-wa-header-light dark:bg-wa-header-dark h-16 flex items-center justify-between px-4 shrink-0 border-b border-transparent dark:border-slate-800/50">
+                <div className="relative group cursor-pointer" title="Upload profile picture">
+                    <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleAvatarUpload} />
+                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 overflow-hidden">
+                        {currentUser?.profile_picture_url ? (
+                            <img src={`http://localhost:8000${currentUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            currentUser ? getInitials(currentUser.email) : 'U'
+                        )}
                     </div>
-                    <button className="bg-primary text-white p-2 rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                    </button>
                 </div>
-                <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-                    <input className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-[16px] md:text-sm transition-all" placeholder="Search chats..." type="text" />
+                <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
+                    <button className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><span className="material-symbols-outlined text-xl">data_usage</span></button>
+                    <button className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><span className="material-symbols-outlined text-xl">chat</span></button>
+                    <button className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><span className="material-symbols-outlined text-xl">more_vert</span></button>
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 space-y-1 pb-20 md:pb-4">
+
+            {/* Search Bar */}
+            <div className="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                <div className="relative bg-[#f0f2f5] dark:bg-[#202c33] rounded-lg flex items-center px-3 py-1.5 overflow-hidden">
+                    <span className="material-symbols-outlined text-slate-500 text-sm mr-4">search</span>
+                    <input className="w-full bg-transparent outline-none text-[15px] placeholder-slate-500 text-slate-800 dark:text-slate-200 min-h-[26px]" placeholder="Search or start new chat" type="text" />
+                </div>
+            </div>
+            <div className="flex-1 overflow-y-auto bg-white dark:bg-wa-panel-dark pb-20 md:pb-0">
                 {users.map(user => (
                     <div
                         key={user.id}
                         onClick={() => setActiveUser(user)}
-                        className={`group relative flex items-center gap-4 p-3 rounded-xl shadow-sm border cursor-pointer transition-colors ${activeUser?.id === user.id ? 'bg-white dark:bg-slate-900 border-primary/30 dark:border-primary/30 ring-1 ring-primary/10' : 'bg-transparent border-transparent hover:bg-white/50 dark:hover:bg-slate-900/50 hover:border-slate-200 dark:hover:border-slate-800'}`}
+                        className={`group relative flex items-center gap-3 pl-3 cursor-pointer transition-colors ${activeUser?.id === user.id ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`}
                     >
-                        <div className="relative shrink-0">
-                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border border-primary/20">
+                        <div className="relative shrink-0 py-3">
+                            <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold overflow-hidden">
                                 {user.profile_picture_url ? (
                                     <img src={`http://localhost:8000${user.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
@@ -58,32 +71,32 @@ export default function ChatList() {
                                 )}
                             </div>
                             {onlineUsers.has(user.id) && (
-                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                                <div className="absolute bottom-3 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-wa-panel-dark rounded-full"></div>
                             )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-start mb-0.5">
-                                <span className="font-semibold text-sm truncate dark:text-slate-200">{user.email}</span>
+                        <div className="flex-1 min-w-0 py-3 pr-4 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex justify-between items-center mb-0.5">
+                                <span className="font-normal text-[17px] truncate dark:text-slate-200">{user.email}</span>
                                 {summaries[user.id]?.unread_count > 0 && (
-                                    <span className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                    <span className="bg-primary text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                         {summaries[user.id].unread_count}
                                     </span>
                                 )}
                             </div>
-                            <p className={`text-xs truncate font-medium ${summaries[user.id]?.unread_count > 0 ? 'text-primary dark:text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            <p className={`text-[14px] leading-5 truncate ${summaries[user.id]?.unread_count > 0 ? 'text-slate-800 dark:text-slate-300 font-medium' : 'text-slate-500 dark:text-slate-400'}`}>
                                 {typingUsers.has(user.id) ? (
-                                    <span className="text-primary italic animate-pulse">typing...</span>
+                                    <span className="text-primary italic">typing...</span>
                                 ) : (
-                                    summaries[user.id]?.last_message || 'Click to chat'
+                                    summaries[user.id]?.last_message || '...'
                                 )}
                             </p>
                         </div>
                         <button
                             onClick={(e) => handleDeleteClick(e, user.id, user.email)}
-                            className="hidden group-hover:flex p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all absolute right-2 bg-white dark:bg-slate-900 shadow-sm border dark:border-slate-800"
+                            className="hidden group-hover:flex absolute right-4 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-white/80 dark:bg-[#202c33]/80 backdrop-blur rounded-full transition-all"
                             title="Delete Chat"
                         >
-                            <span className="material-symbols-outlined text-lg">delete</span>
+                            <span className="material-symbols-outlined text-xl">keyboard_arrow_down</span>
                         </button>
                     </div>
                 ))}

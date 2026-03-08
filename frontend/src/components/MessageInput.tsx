@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useChatStore } from '../store/chatStore';
 import { messagesApi } from '../api/messages';
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 
 export default function MessageInput() {
     const [inputMessage, setInputMessage] = useState('');
@@ -164,94 +164,97 @@ export default function MessageInput() {
     if (!activeUser) return null;
 
     return (
-        <footer className="p-3 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
-            <form onSubmit={handleSend} className="max-w-4xl mx-auto relative group flex flex-col gap-2">
+        <footer className="px-4 py-[10px] bg-wa-header-light dark:bg-wa-header-dark border-t border-transparent shrink-0">
+            <form onSubmit={handleSend} className="relative group flex flex-col gap-2">
                 {replyingTo && (
-                    <div className="bg-slate-100 dark:bg-slate-800 p-2 md:p-3 rounded-r-xl rounded-l-sm border-l-4 border-primary flex items-start justify-between shadow-sm animate-fade-in relative ml-2 md:ml-0">
-                        <div className="flex flex-col overflow-hidden w-full">
-                            <span className="text-[11px] font-bold text-primary mb-0.5">
-                                Replying to {users.find(u => u.id === replyingTo.sender_id)?.email || currentUser?.email || 'User'}
+                    <div className="bg-wa-panel-dark p-2 md:p-3 rounded-xl border-l-4 border-primary flex items-start justify-between shadow-sm animate-fade-in relative mx-12">
+                        <div className="flex flex-col overflow-hidden w-full bg-[#202c33] px-3 py-1.5 rounded-r-lg">
+                            <span className="text-[13px] font-bold text-primary mb-0.5">
+                                {users.find(u => u.id === replyingTo.sender_id)?.email || currentUser?.email || 'User'}
                             </span>
-                            <span className="text-xs text-slate-600 dark:text-slate-300 truncate pr-6 block max-w-full">
+                            <span className="text-[13px] text-slate-400 truncate pr-6 block max-w-full">
                                 {replyingTo.content.startsWith('AUDIO:') ? '🎵 Voice Message' : (replyingTo.content.startsWith('REPLY::') ? replyingTo.content.split('::').slice(4).join('::') : replyingTo.content)}
                             </span>
                         </div>
                         <button
                             type="button"
                             onClick={() => setReplyingTo(null)}
-                            className="text-slate-400 hover:text-red-500 transition-colors p-1 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 absolute right-2 top-2"
+                            className="text-slate-400 hover:text-slate-200 transition-colors p-1 flex items-center justify-center absolute right-3 top-3"
                         >
-                            <span className="material-symbols-outlined text-[16px]">close</span>
+                            <span className="material-symbols-outlined text-[18px]">close</span>
                         </button>
                     </div>
                 )}
 
-                <div className="flex items-center gap-2 md:gap-3 bg-slate-50 dark:bg-slate-800/50 p-2 md:p-3 rounded-2xl border border-slate-200 dark:border-slate-700 focus-within:border-primary transition-all shadow-sm">
+                <div className="flex items-end gap-2 px-2">
+                    {/* Left Icons */}
+                    <div className="flex items-center gap-1 pb-1">
+                        <div className="relative" ref={emojiPickerRef}>
+                            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="p-2.5 text-slate-500 hover:text-slate-400 transition-colors flex items-center">
+                                <span className="material-symbols-outlined text-[26px]">mood</span>
+                            </button>
+                            {showEmojiPicker && (
+                                <div className="absolute bottom-[calc(100%+12px)] left-0 mb-2 z-50 shadow-xl">
+                                    <EmojiPicker onEmojiClick={onEmojiClick} theme={Theme.DARK} />
+                                </div>
+                            )}
+                        </div>
+                        <button type="button" className="p-2.5 text-slate-500 hover:text-slate-400 transition-colors flex items-center">
+                            <span className="material-symbols-outlined text-[26px]">add</span>
+                        </button>
+                    </div>
+
+                    {/* Input Field or Recording State */}
                     {isRecording ? (
-                        <div className="flex-1 flex items-center justify-between px-2 w-full animate-fade-in">
+                        <div className="flex-1 bg-white dark:bg-wa-panel-dark rounded-xl px-4 py-2.5 flex items-center justify-between mb-1 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                                <span className="text-red-500 font-medium tracking-wide">
+                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                                <span className="text-red-500 font-medium tracking-wide font-display">
                                     {formatRecordingTime(recordingTime)}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button type="button" onClick={cancelRecording} className="p-2.5 text-slate-400 hover:text-red-500 bg-slate-200 dark:bg-slate-700 rounded-full transition-all flex items-center justify-center">
+                                <button type="button" onClick={cancelRecording} className="p-1 text-slate-400 hover:text-red-500 transition-all flex items-center justify-center">
                                     <span className="material-symbols-outlined text-[20px]">delete</span>
                                 </button>
-                                <button type="button" onClick={stopRecordingAndSend} className="p-2.5 bg-green-500 text-white rounded-full hover:scale-105 active:scale-95 transition-all shadow-md shadow-green-500/20 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[20px]">send</span>
+                                <button type="button" onClick={stopRecordingAndSend} className="p-1 text-primary hover:text-primary/80 transition-all flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-[24px]">send</span>
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <>
-                            <button type="button" className="hidden sm:flex p-2 text-slate-400 hover:text-primary transition-colors">
-                                <span className="material-symbols-outlined">add_circle</span>
-                            </button>
+                        <div className="flex-1 bg-white dark:bg-wa-panel-dark rounded-xl px-4 py-0 min-h-[42px] max-h-[120px] mb-1 flex items-center shadow-sm">
                             <input
-                                className="flex-1 bg-transparent border-none focus:ring-0 text-[16px] md:text-sm text-slate-900 dark:text-slate-100 outline-none w-full px-2"
-                                placeholder={`Message ${activeUser.email}...`}
+                                className="w-full bg-transparent border-none focus:ring-0 text-[15px] text-slate-900 dark:text-slate-100 placeholder-slate-500 outline-none py-2.5"
+                                placeholder="Type a message"
                                 type="text"
                                 value={inputMessage}
                                 onChange={handleMessageInput}
                                 autoComplete="off"
                             />
-                            <div className="flex items-center gap-0 md:gap-1 shrink-0">
-                                <div className="relative" ref={emojiPickerRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                        className="hidden sm:flex p-2 text-slate-400 hover:text-primary transition-colors"
-                                    >
-                                        <span className="material-symbols-outlined">mood</span>
-                                    </button>
-                                    {showEmojiPicker && (
-                                        <div className="absolute bottom-[calc(100%+12px)] right-0 mb-2 z-50">
-                                            <EmojiPicker onEmojiClick={onEmojiClick} />
-                                        </div>
-                                    )}
-                                </div>
-                                {inputMessage.trim() ? (
-                                    <button
-                                        type="submit"
-                                        disabled={!isConnected}
-                                        className="bg-primary text-white p-2.5 rounded-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all shadow-md shadow-primary/20 flex items-center justify-center cursor-pointer ml-1"
-                                    >
-                                        <span className="material-symbols-outlined text-[20px]">send</span>
-                                    </button>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={startRecording}
-                                        className="p-2 text-slate-400 hover:text-primary transition-colors flex items-center justify-center"
-                                    >
-                                        <span className="material-symbols-outlined">mic</span>
-                                    </button>
-                                )}
-                            </div>
-                        </>
+                        </div>
                     )}
+
+                    {/* Right Icon (Voice or Send) */}
+                    <div className="flex items-center justify-center pb-1 pl-1 pr-1">
+                        {inputMessage.trim() ? (
+                            <button
+                                type="submit"
+                                disabled={!isConnected}
+                                className="p-2.5 text-slate-500 hover:text-slate-400 transition-colors flex items-center justify-center"
+                            >
+                                <span className="material-symbols-outlined text-[26px]">send</span>
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={startRecording}
+                                className="p-2.5 text-slate-500 hover:text-slate-400 transition-colors flex items-center justify-center"
+                            >
+                                <span className="material-symbols-outlined text-[26px]">mic</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </form>
         </footer>
