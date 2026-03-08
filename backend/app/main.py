@@ -48,20 +48,21 @@ class ConnectionManager:
         self.active_connections[user_id] = websocket
         await self.broadcast_presence(user_id, True)
 
-    async def disconnect(self, user_id: int):
+    async def disconnect(self, user_id: int, last_seen: str = None):
         if user_id in self.active_connections:
             del self.active_connections[user_id]
-            await self.broadcast_presence(user_id, False)
+            await self.broadcast_presence(user_id, False, last_seen)
 
     async def send_personal_message(self, message: str, user_id: int):
         if user_id in self.active_connections:
             await self.active_connections[user_id].send_text(message)
 
-    async def broadcast_presence(self, user_id: int, is_online: bool):
+    async def broadcast_presence(self, user_id: int, is_online: bool, last_seen: str = None):
         message = json.dumps({
             "type": "presence",
             "user_id": user_id,
-            "is_online": is_online
+            "is_online": is_online,
+            "last_seen": last_seen
         })
         for uid, connection in self.active_connections.items():
             if uid != user_id:
@@ -112,8 +113,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 if msg_type == "chat_message":
                     content = message_data.get("content")
                     if content:
+                        receiver_online = receiver_id in manager.active_connections
+                        msg_status = "delivered" if receiver_online else "sent"
                         # 1. Save message to database
-                        new_msg = Message(sender_id=user.id, receiver_id=receiver_id, content=content)
+                        new_msg = Message(sender_id=user.id, receiver_id=receiver_id, content=content, status=msg_status)
                         db.add(new_msg)
                         db.commit()
                         db.refresh(new_msg)
@@ -136,7 +139,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                                 "receiver_id": receiver_id,
                                 "content": content,
                                 "timestamp": timestamp_iso,
-                                "is_read": False
+                                "status": msg_status
                             }
                         }
                         response_str = json.dumps(response_payload)
@@ -159,11 +162,12 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 elif msg_type == "read_receipt":
                     message_ids = message_data.get("message_ids", [])
                     if message_ids:
-                        db.query(Message).filter(Message.id.in_(message_ids)).update({"is_read": True}, synchronize_session=False)
+                        db.query(Message).filter(Message.id.in_(message_ids)).update({"status": "read"}, synchronize_session=False)
                         db.commit()
                         
                         response_payload = {
-                            "type": "read_receipt",
+                            "type": "message_status_update",
+                            "status": "read",
                             "sender_id": user.id,
                             "receiver_id": receiver_id,
                             "message_ids": message_ids
@@ -180,7 +184,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 print(f"WS Handling Error: {e}")
     except WebSocketDisconnect:
         if 'user' in locals():
-            await manager.disconnect(user.id)
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            user.last_seen = now
+            db.commit()
+            await manager.disconnect(user.id, last_seen=now.isoformat())
     except JWTError:
         await websocket.close(code=1008)
     finally:

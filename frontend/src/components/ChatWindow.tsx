@@ -90,79 +90,74 @@ export default function ChatWindow() {
 
     if (!activeUser) {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 h-full hidden md:flex">
-                <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
-                    <span className="material-symbols-outlined text-5xl">forum</span>
+            <div className="flex-1 flex flex-col items-center justify-center text-[#54656f] dark:text-[#8696a0] bg-wa-chat-light dark:bg-wa-chat-dark h-full hidden md:flex border-b-[6px] border-b-primary shadow-inner">
+                <div className="w-80 h-80 rounded-full flex items-center justify-center mb-8 opacity-50 dark:opacity-20 pointer-events-none">
+                    <span className="material-symbols-outlined text-[120px] font-thin">devices</span>
                 </div>
-                <h2 className="text-xl font-bold text-slate-600 dark:text-slate-300 mb-2">Your Messages</h2>
-                <p className="text-sm">Select a user from the sidebar to start a private chat.</p>
+                <h2 className="text-3xl font-light text-[#41525d] dark:text-[#e9edef] mb-4 font-display">WhatsApp Web Clone</h2>
+                <p className="text-[14px] leading-relaxed max-w-md text-center">Seamlessly send and receive messages without keeping your phone online.</p>
             </div>
         );
     }
 
     return (
-        <div className={`flex-1 flex-col relative bg-white dark:bg-slate-900 h-full ${activeUser ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`flex-1 flex-col relative bg-wa-chat-light dark:bg-wa-chat-dark h-full ${activeUser ? 'flex' : 'hidden md:flex'}`}>
             {/* Chat Header */}
-            <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 shrink-0">
-                <div className="flex items-center gap-2 md:gap-4">
+            <header className="h-[60px] flex items-center justify-between px-4 border-l border-transparent bg-wa-header-light dark:bg-wa-header-dark z-10 shrink-0">
+                <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
                     <button
                         onClick={() => setActiveUser(null)}
-                        className="md:hidden p-2 -ml-2 mr-1 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all flex items-center justify-center"
+                        className="md:hidden p-1 -ml-2 text-slate-500 hover:text-slate-600 transition-all flex items-center justify-center"
                     >
-                        <span className="material-symbols-outlined text-xl">arrow_back_ios_new</span>
+                        <span className="material-symbols-outlined text-xl">arrow_back</span>
                     </button>
                     <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden border border-primary/20">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
                             {activeUser.profile_picture_url ? (
                                 <img src={`http://localhost:8000${activeUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
                                 getInitials(activeUser.email)
                             )}
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
                     </div>
-                    <div>
-                        <h2 className="font-bold text-base">{activeUser.email}</h2>
-                        <p className={`text-xs font-medium ${onlineUsers.has(activeUser.id) ? 'text-green-500' : 'text-slate-400'}`}>
-                            {onlineUsers.has(activeUser.id) ? 'Online' : 'Offline'}
+                    <div className="ml-1">
+                        <h2 className="font-normal text-[16px] text-[#111b21] dark:text-[#e9edef]">{activeUser.email}</h2>
+                        <p className={`text-[13px] ${onlineUsers.has(activeUser.id) ? 'text-[#54656f] dark:text-[#aebac1]' : 'text-[#54656f] dark:text-[#aebac1]'}`}>
+                            {onlineUsers.has(activeUser.id) ? 'online' : 'click for contact info'}
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 md:gap-2">
-                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-                        <span className="material-symbols-outlined text-[20px] md:text-2xl">videocam</span>
+                <div className="flex items-center gap-2 md:gap-4 text-[#54656f] dark:text-[#aebac1]">
+                    <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[24px]">videocam</span>
                     </button>
-                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-                        <span className="material-symbols-outlined text-[20px] md:text-2xl">call</span>
-                    </button>
-                    <div className="hidden md:block w-px h-6 bg-slate-200 dark:bg-slate-800 mx-2"></div>
-                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
-                        <span className="material-symbols-outlined text-[20px] md:text-2xl">info</span>
+                    <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[24px]">search</span>
                     </button>
                     <button
                         onClick={handleDeleteChat}
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
                         title="Delete Chat History"
                     >
-                        <span className="material-symbols-outlined text-[20px] md:text-2xl">delete</span>
+                        <span className="material-symbols-outlined text-[24px]">delete</span>
                     </button>
                 </div>
             </header>
 
             {/* Messages Stream */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-20 md:pb-8">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-[5%] md:px-[9%] py-4 space-y-2 pb-20 md:pb-8 relative">
                 {hasMoreMessages ? (
-                    <div ref={observerTarget} className="flex justify-center h-8 items-center">
+                    <div ref={observerTarget} className="flex justify-center h-8 items-center mb-4">
                         {isFetchingRef.current && (
-                            <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
-                                <span className="text-xs text-slate-400 font-medium">Loading history...</span>
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-wa-panel-dark/50 px-3 py-1.5 rounded-full shadow-sm">
+                                <div className="w-3.5 h-3.5 rounded-full border-2 border-[#54656f] border-t-transparent animate-spin"></div>
+                                <span className="text-[12px] text-[#54656f] dark:text-[#8696a0]">Loading history...</span>
                             </div>
                         )}
                     </div>
                 ) : (
-                    <div className="flex justify-center">
-                        <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">Start of Conversation</span>
+                    <div className="flex justify-center mb-6 mt-2">
+                        <span className="px-3 py-1 bg-[#ffeecd] dark:bg-[#182229] shadow-sm rounded-lg text-[12.5px] text-[#54656f] dark:text-[#aebac1]">🔒 Messages are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.</span>
                     </div>
                 )}
 
@@ -184,39 +179,50 @@ export default function ChatWindow() {
                     const audioUrl = isAudio ? displayContent.substring(6) : null;
 
                     return (
-                        <div key={msg.id || index} className={`flex gap-4 max-w-2xl group ${isMine ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
+                        <div key={msg.id || index} className={`flex max-w-[85%] md:max-w-[75%] group relative ${isMine ? 'ml-auto' : 'mr-auto'}`}>
                             {/* Reply Action Button */}
-                            <div className={`hidden group-hover:flex items-center justify-center self-center px-2 `}>
+                            <div className={`hidden group-hover:flex items-center justify-center absolute top-1 ${isMine ? '-left-8' : '-right-8'}`}>
                                 <button
                                     onClick={() => setReplyingTo(msg)}
-                                    className="p-1.5 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
-                                    title="Reply to message"
+                                    className="p-1 text-[#8696a0] hover:text-[#54656f] dark:hover:text-[#aebac1] bg-white/80 dark:bg-wa-panel-dark/80 rounded-full shadow-sm transition-all"
+                                    title="Reply"
                                 >
-                                    <span className="material-symbols-outlined text-[18px]">reply</span>
+                                    <span className="material-symbols-outlined text-[16px]">reply</span>
                                 </button>
                             </div>
 
-                            <div className={`flex flex-col gap-1.5 ${isMine ? 'items-end' : 'items-start'}`}>
-                                <div className={`p-4 rounded-2xl text-sm shadow-md leading-relaxed ${isMine ? 'bg-primary text-white rounded-tr-none shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'}`}>
-                                    {replyContext && (
-                                        <div className={`mb-2 p-2 rounded-r-lg rounded-l-[4px] border-l-[4px] opacity-90 max-w-sm ${isMine ? 'bg-black/10 border-white/40' : 'bg-black/5 dark:bg-white/5 border-primary/40'}`}>
-                                            <div className="font-bold text-[11px] mb-0.5 opacity-80 truncate">{replyContext.sender}</div>
-                                            <div className="text-xs line-clamp-2 truncate max-w-full text-ellipsis overflow-hidden">{replyContext.snippet}</div>
-                                        </div>
-                                    )}
-                                    {isAudio ? (
-                                        <audio controls src={`http://localhost:8000${audioUrl}`} className="h-10 w-64 max-w-full rounded-lg" />
-                                    ) : (
-                                        displayContent
-                                    )}
-                                </div>
-                                <div className={`flex items-center gap-1 text-[10px] text-slate-400 ${isMine ? 'flex-row-reverse' : ''}`}>
-                                    <span>{formatTime(msg.timestamp)}</span>
-                                    {isMine && (
-                                        <span className={`material-symbols-outlined text-[14px] ${msg.status === 'pending' ? 'text-slate-300 dark:text-slate-500 animate-pulse' : msg.is_read ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'}`}>
-                                            {msg.status === 'pending' ? 'schedule' : msg.is_read ? 'done_all' : 'done'}
-                                        </span>
-                                    )}
+                            <div className={`flex flex-col relative px-2 py-1.5 rounded-lg shadow-sm text-[14.2px] leading-relaxed
+                                ${isMine
+                                    ? 'bg-wa-bubble-out-light dark:bg-wa-bubble-out-dark text-[#111b21] dark:text-[#e9edef] rounded-tr-none'
+                                    : 'bg-white dark:bg-wa-bubble-in-dark text-[#111b21] dark:text-[#e9edef] rounded-tl-none'}
+                            `}>
+                                {replyContext && (
+                                    <div className={`mb-1 p-1.5 rounded-md border-l-4 opacity-90 text-[13px] ${isMine ? 'bg-black/5 border-[#02a698] dark:bg-black/20 dark:border-[#21c062]' : 'bg-black/5 border-[#00a884] dark:bg-black/20 dark:border-[#00a884]'}`}>
+                                        <div className={`font-bold mb-0.5 truncate ${isMine ? 'text-[#02a698] dark:text-[#21c062]' : 'text-[#00a884] dark:text-[#00a884]'}`}>{replyContext.sender}</div>
+                                        <div className="line-clamp-3 text-[#54656f] dark:text-[#aebac1] min-h-[1.5em]">{replyContext.snippet}</div>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-wrap items-end justify-between min-w-[70px]">
+                                    <div className="break-words pr-2 pb-1.5 pt-0.5 max-w-full">
+                                        {isAudio ? (
+                                            <audio controls src={`http://localhost:8000${audioUrl}`} className="h-9 w-52" />
+                                        ) : (
+                                            displayContent
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-1 shrink-0 ml-auto -mb-1 mt-1 text-[11px] text-[#667781] dark:text-[#8696a0]">
+                                        <span>{formatTime(msg.timestamp)}</span>
+                                        {isMine && (() => {
+                                            const status = (msg as any).status || (msg.is_read ? 'read' : 'sent');
+                                            return (
+                                                <span className={`material-symbols-outlined text-[15px] font-bold ${status === 'read' ? 'text-[#53bdeb]' : ''}`}>
+                                                    {status === 'pending' ? 'schedule' : status === 'read' ? 'done_all' : (status === 'delivered' ? 'done_all' : 'done')}
+                                                </span>
+                                            );
+                                        })()}
+                                    </div>
                                 </div>
                             </div>
                         </div>

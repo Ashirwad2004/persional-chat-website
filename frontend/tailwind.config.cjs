@@ -7,11 +7,15 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                "primary": "#4b2bee",
-                "sage": "#9db4a0",
-                "lavender": "#e2e2f3",
-                "background-light": "#f6f6f8",
-                "background-dark": "#131022",
+                "primary": "#00a884",         // WhatsApp Teal
+                "wa-header-light": "#f0f2f5", // Light Header
+                "wa-header-dark": "#202c33",  // Dark Header
+                "wa-panel-dark": "#111b21",   // Dark Pane Background
+                "wa-chat-dark": "#0b141a",    // Dark Chat Background
+                "wa-chat-light": "#efeae2",   // Light Chat Background
+                "wa-bubble-out-light": "#d9fdd3",
+                "wa-bubble-out-dark": "#005c4b",
+                "wa-bubble-in-dark": "#202c33",
             },
             fontFamily: {
                 "display": ["Plus Jakarta Sans", "sans-serif"]
