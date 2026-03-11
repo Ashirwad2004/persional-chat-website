@@ -3,11 +3,12 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { useChatStore } from '../store/chatStore';
 import { messagesApi } from '../api/messages';
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
+import { WS_BASE_URL } from '../config';
 
 export default function MessageInput() {
     const [inputMessage, setInputMessage] = useState('');
     const { activeUser, setSummaries, replyingTo, setReplyingTo, users, currentUser } = useChatStore();
-    const { isConnected, sendChatMessage, sendTyping } = useWebSocket('ws://localhost:8000/ws/chat');
+    const { isConnected, sendChatMessage, sendTyping } = useWebSocket(`${WS_BASE_URL}/ws/chat`);
 
     // Typing states
     const lastTypingTimeRef = useRef<number>(0);

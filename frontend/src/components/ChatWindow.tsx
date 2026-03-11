@@ -2,10 +2,11 @@ import { useEffect, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useMessages } from '../hooks/useMessages';
+import { API_BASE_URL, WS_BASE_URL } from '../config';
 
 export default function ChatWindow() {
     const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages, setReplyingTo } = useChatStore();
-    const { sendReadReceipt } = useWebSocket('ws://localhost:8000/ws/chat');
+    const { sendReadReceipt } = useWebSocket(`${WS_BASE_URL}/ws/chat`);
     const { markAsRead, deleteChatHistory, loadMoreMessages } = useMessages();
     const bottomRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -114,7 +115,7 @@ export default function ChatWindow() {
                     <div className="relative shrink-0">
                         <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
                             {activeUser.profile_picture_url ? (
-                                <img src={`http://localhost:8000${activeUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                                <img src={`${API_BASE_URL}${activeUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
                                 getInitials(activeUser.email)
                             )}
@@ -206,7 +207,7 @@ export default function ChatWindow() {
                                 <div className="flex flex-wrap items-end justify-between min-w-[70px]">
                                     <div className="break-words pr-2 pb-1.5 pt-0.5 max-w-full">
                                         {isAudio ? (
-                                            <audio controls src={`http://localhost:8000${audioUrl}`} className="h-9 w-52" />
+                                            <audio controls src={`${API_BASE_URL}${audioUrl}`} className="h-9 w-52" />
                                         ) : (
                                             displayContent
                                         )}

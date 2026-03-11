@@ -3,6 +3,7 @@ import { useChatStore } from '../store/chatStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useUsers } from '../hooks/useUsers';
 import { useMessages } from '../hooks/useMessages';
+import { WS_BASE_URL } from '../config';
 
 import ChatList from '../components/ChatList';
 import ChatWindow from '../components/ChatWindow';
@@ -14,7 +15,7 @@ export default function Dashboard() {
     const { fetchSummaries, fetchChatHistory } = useMessages();
 
     // Initialize WebSocket connection
-    const { isConnected } = useWebSocket('ws://localhost:8000/ws/chat');
+    const { isConnected } = useWebSocket(`${WS_BASE_URL}/ws/chat`);
     const wasConnectedRef = useRef(isConnected);
 
     // 1. Initial Data Loading (Me, Users, Summaries)

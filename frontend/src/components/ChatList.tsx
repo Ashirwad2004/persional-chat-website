@@ -1,6 +1,7 @@
 import { useChatStore } from '../store/chatStore';
 import { useMessages } from '../hooks/useMessages';
 import { useUsers } from '../hooks/useUsers';
+import { API_BASE_URL } from '../config';
 
 export default function ChatList() {
     const { currentUser, users, activeUser, setActiveUser, onlineUsers, typingUsers, summaries } = useChatStore();
@@ -35,7 +36,7 @@ export default function ChatList() {
                     <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleAvatarUpload} />
                     <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 overflow-hidden">
                         {currentUser?.profile_picture_url ? (
-                            <img src={`http://localhost:8000${currentUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                            <img src={`${API_BASE_URL}${currentUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
                             currentUser ? getInitials(currentUser.email) : 'U'
                         )}
@@ -65,7 +66,7 @@ export default function ChatList() {
                         <div className="relative shrink-0 py-3">
                             <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold overflow-hidden">
                                 {user.profile_picture_url ? (
-                                    <img src={`http://localhost:8000${user.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                                    <img src={`${API_BASE_URL}${user.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
                                     getInitials(user.email)
                                 )}
