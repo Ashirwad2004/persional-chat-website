@@ -8,9 +8,9 @@ export function useMessages() {
     const fetchSummaries = useCallback(async () => {
         try {
             const data = await messagesApi.getSummaries();
-            const sumMap: Record<number, { last_message: string; unread_count: number }> = {};
+            const sumMap: Record<number, { last_message: string; unread_count: number; timestamp?: string }> = {};
             data.forEach(s => {
-                sumMap[s.user_id] = { last_message: s.last_message, unread_count: s.unread_count };
+                sumMap[s.user_id] = { last_message: s.last_message, unread_count: s.unread_count, timestamp: s.timestamp };
             });
             setSummaries(() => sumMap);
         } catch (error) {
@@ -66,7 +66,8 @@ export function useMessages() {
                     newSummaries[userId] = {
                         ...newSummaries[userId],
                         last_message: '',
-                        unread_count: 0
+                        unread_count: 0,
+                        timestamp: new Date().toISOString()
                     };
                 }
                 return newSummaries;

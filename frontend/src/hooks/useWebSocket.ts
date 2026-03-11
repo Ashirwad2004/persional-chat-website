@@ -111,7 +111,8 @@ const handleMessage = (event: MessageEvent) => {
                     last_message: msg.content,
                     unread_count: (isFromOtherUser && activeUser?.id !== msg.sender_id)
                         ? (prev[msg.sender_id]?.unread_count || 0) + 1
-                        : 0
+                        : 0,
+                    timestamp: msg.timestamp
                 }
             }));
 

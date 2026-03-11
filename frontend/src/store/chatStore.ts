@@ -25,7 +25,7 @@ interface ChatState {
     messages: ChatMessage[];
     onlineUsers: Set<number>;
     typingUsers: Set<number>;
-    summaries: Record<number, { last_message: string; unread_count: number }>;
+    summaries: Record<number, { last_message: string; unread_count: number; timestamp?: string }>;
     hasMoreMessages: boolean;
     replyingTo: ChatMessage | null;
 
@@ -37,7 +37,7 @@ interface ChatState {
     updateMessageStatus: (clientId: string, updatedMsg: Partial<ChatMessage>) => void;
     setOnlineUsers: (updater: (prev: Set<number>) => Set<number>) => void;
     setTypingUsers: (updater: (prev: Set<number>) => Set<number>) => void;
-    setSummaries: (updater: (prev: Record<number, { last_message: string; unread_count: number }>) => Record<number, { last_message: string; unread_count: number }>) => void;
+    setSummaries: (updater: (prev: Record<number, { last_message: string; unread_count: number; timestamp?: string }>) => Record<number, { last_message: string; unread_count: number; timestamp?: string }>) => void;
     setHasMoreMessages: (hasMore: boolean) => void;
     setReplyingTo: (msg: ChatMessage | null) => void;
 }

@@ -57,7 +57,11 @@ export default function ChatList() {
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto bg-white dark:bg-wa-panel-dark pb-20 md:pb-0">
-                {users.map(user => (
+                {[...users].sort((a, b) => {
+                    const timeA = summaries[a.id]?.timestamp ? new Date(summaries[a.id].timestamp!).getTime() : 0;
+                    const timeB = summaries[b.id]?.timestamp ? new Date(summaries[b.id].timestamp!).getTime() : 0;
+                    return timeB - timeA;
+                }).map(user => (
                     <div
                         key={user.id}
                         onClick={() => setActiveUser(user)}

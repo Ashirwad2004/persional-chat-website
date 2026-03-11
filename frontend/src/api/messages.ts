@@ -5,6 +5,7 @@ export interface SummaryData {
     user_id: number;
     last_message: string;
     unread_count: number;
+    timestamp?: string;
 }
 
 export const messagesApi = {
