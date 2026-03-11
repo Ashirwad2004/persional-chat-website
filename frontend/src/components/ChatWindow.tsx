@@ -95,7 +95,7 @@ export default function ChatWindow() {
                 <div className="w-80 h-80 rounded-full flex items-center justify-center mb-8 opacity-50 dark:opacity-20 pointer-events-none">
                     <span className="material-symbols-outlined text-[120px] font-thin">devices</span>
                 </div>
-                <h2 className="text-3xl font-light text-[#41525d] dark:text-[#e9edef] mb-4 font-display">WhatsApp Web Clone</h2>
+                <h2 className="text-3xl font-light text-[#41525d] dark:text-[#e9edef] mb-4 font-display">Nexus Chat</h2>
                 <p className="text-[14px] leading-relaxed max-w-md text-center">Seamlessly send and receive messages without keeping your phone online.</p>
             </div>
         );
@@ -219,7 +219,7 @@ export default function ChatWindow() {
                                             const status = (msg as any).status || (msg.is_read ? 'read' : 'sent');
                                             return (
                                                 <span className={`material-symbols-outlined text-[15px] font-bold ${status === 'read' ? 'text-[#53bdeb]' : ''}`}>
-                                                    {status === 'pending' ? 'schedule' : status === 'read' ? 'done_all' : (status === 'delivered' ? 'done_all' : 'done')}
+                                                    {status === 'pending' ? 'schedule' : status === 'read' ? 'done_all' : 'done'}
                                                 </span>
                                             );
                                         })()}

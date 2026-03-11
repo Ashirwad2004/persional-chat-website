@@ -71,7 +71,8 @@ export default function MessageInput() {
                 ...prev,
                 [activeUser.id]: {
                     last_message: inputMessage,
-                    unread_count: prev[activeUser.id]?.unread_count || 0
+                    unread_count: prev[activeUser.id]?.unread_count || 0,
+                    timestamp: new Date().toISOString()
                 }
             }));
 
@@ -121,7 +122,8 @@ export default function MessageInput() {
                         ...prev,
                         [activeUser.id]: {
                             last_message: "🎵 Voice Message",
-                            unread_count: prev[activeUser.id]?.unread_count || 0
+                            unread_count: prev[activeUser.id]?.unread_count || 0,
+                            timestamp: new Date().toISOString()
                         }
                     }));
                 } catch (error) {

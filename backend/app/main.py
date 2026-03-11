@@ -114,8 +114,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                 if msg_type == "chat_message":
                     content = message_data.get("content")
                     if content:
-                        receiver_online = receiver_id in manager.active_connections
-                        msg_status = "delivered" if receiver_online else "sent"
+                        msg_status = "sent"
                         # 1. Save message to database
                         new_msg = Message(sender_id=user.id, receiver_id=receiver_id, content=content, status=msg_status)
                         db.add(new_msg)
