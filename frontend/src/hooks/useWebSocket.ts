@@ -30,7 +30,17 @@ export interface ReadReceiptEvent extends BaseEvent {
     message_ids: number[];
 }
 
-export type WsEvent = ChatMessageEvent | PresenceEvent | TypingEvent | ReadReceiptEvent;
+export interface SignalingEvent extends Omit<BaseEvent, 'type'> {
+    type: 'call_offer' | 'call_answer' | 'ice_candidate' | 'call_reject' | 'call_end';
+    sender_id: number;
+    receiver_id: number;
+    // WebRTC payload variants
+    sdp?: RTCSessionDescriptionInit;
+    candidate?: RTCIceCandidateInit;
+    call_id?: string | number; // Added for Database Call History tracking
+}
+
+export type WsEvent = ChatMessageEvent | PresenceEvent | TypingEvent | ReadReceiptEvent | SignalingEvent;
 
 const generateUuid = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -140,6 +150,9 @@ const handleMessage = (event: MessageEvent) => {
 
                 sendPushNotification('New Message', displaySnippet);
             }
+        } else if (['call_offer', 'call_answer', 'ice_candidate', 'call_reject', 'call_end'].includes(data.type)) {
+            // Dispatch custom event for signaling messages
+            window.dispatchEvent(new CustomEvent('webrtc_signal', { detail: data }));
         }
     } catch (error) {
         console.error('WebSocket parse error', event.data);
@@ -265,5 +278,11 @@ export function useWebSocket(url: string) {
         }
     }, [isConnected]);
 
-    return { isConnected, sendChatMessage, sendTyping, sendReadReceipt };
+    const sendSignalingMessage = useCallback((payload: any) => {
+        if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
+            wsInstance.send(JSON.stringify(payload));
+        }
+    }, [isConnected]);
+
+    return { isConnected, sendChatMessage, sendTyping, sendReadReceipt, sendSignalingMessage };
 }

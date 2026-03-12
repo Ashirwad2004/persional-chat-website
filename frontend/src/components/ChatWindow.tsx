@@ -2,12 +2,14 @@ import { useEffect, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useMessages } from '../hooks/useMessages';
+import { useWebRTC } from '../hooks/useWebRTC';
 import { API_BASE_URL, WS_BASE_URL } from '../config';
 
 export default function ChatWindow() {
     const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages, setReplyingTo } = useChatStore();
     const { sendReadReceipt } = useWebSocket(`${WS_BASE_URL}/ws/chat`);
     const { markAsRead, deleteChatHistory, loadMoreMessages } = useMessages();
+    const { startCall } = useWebRTC();
     const bottomRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const observerTarget = useRef<HTMLDivElement>(null);
@@ -129,8 +131,19 @@ export default function ChatWindow() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 md:gap-4 text-[#54656f] dark:text-[#aebac1]">
-                    <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center">
+                    <button 
+                        onClick={() => activeUser && startCall(activeUser, true)}
+                        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
+                        title="Video Call"
+                    >
                         <span className="material-symbols-outlined text-[24px]">videocam</span>
+                    </button>
+                    <button 
+                        onClick={() => activeUser && startCall(activeUser, false)}
+                        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
+                        title="Voice Call"
+                    >
+                        <span className="material-symbols-outlined text-[24px]">call</span>
                     </button>
                     <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center">
                         <span className="material-symbols-outlined text-[24px]">search</span>
@@ -182,25 +195,25 @@ export default function ChatWindow() {
                     return (
                         <div key={msg.id || index} className={`flex max-w-[85%] md:max-w-[75%] group relative ${isMine ? 'ml-auto' : 'mr-auto'}`}>
                             {/* Reply Action Button */}
-                            <div className={`hidden group-hover:flex items-center justify-center absolute top-1 ${isMine ? '-left-8' : '-right-8'}`}>
+                            <div className={`flex items-center justify-center absolute top-1/2 -translate-y-1/2 ${isMine ? '-left-10' : '-right-10'} opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 opacity-40 md:opacity-0 pointer-events-auto`}>
                                 <button
                                     onClick={() => setReplyingTo(msg)}
-                                    className="p-1 text-[#8696a0] hover:text-[#54656f] dark:hover:text-[#aebac1] bg-white/80 dark:bg-wa-panel-dark/80 rounded-full shadow-sm transition-all"
+                                    className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-white/70 hover:bg-white dark:bg-wa-panel-dark/70 dark:hover:bg-wa-panel-dark backdrop-blur-sm rounded-full shadow-sm transition-all"
                                     title="Reply"
                                 >
-                                    <span className="material-symbols-outlined text-[16px]">reply</span>
+                                    <span className="material-symbols-outlined text-[18px]">reply</span>
                                 </button>
                             </div>
 
-                            <div className={`flex flex-col relative px-2 py-1.5 rounded-lg shadow-sm text-[14.2px] leading-relaxed
+                            <div className={`flex flex-col relative px-2.5 py-1.5 rounded-xl shadow-sm text-[14.2px] leading-relaxed
                                 ${isMine
                                     ? 'bg-wa-bubble-out-light dark:bg-wa-bubble-out-dark text-[#111b21] dark:text-[#e9edef] rounded-tr-none'
                                     : 'bg-white dark:bg-wa-bubble-in-dark text-[#111b21] dark:text-[#e9edef] rounded-tl-none'}
                             `}>
                                 {replyContext && (
-                                    <div className={`mb-1 p-1.5 rounded-md border-l-4 opacity-90 text-[13px] ${isMine ? 'bg-black/5 border-[#02a698] dark:bg-black/20 dark:border-[#21c062]' : 'bg-black/5 border-[#00a884] dark:bg-black/20 dark:border-[#00a884]'}`}>
-                                        <div className={`font-bold mb-0.5 truncate ${isMine ? 'text-[#02a698] dark:text-[#21c062]' : 'text-[#00a884] dark:text-[#00a884]'}`}>{replyContext.sender}</div>
-                                        <div className="line-clamp-3 text-[#54656f] dark:text-[#aebac1] min-h-[1.5em]">{replyContext.snippet}</div>
+                                    <div className={`mb-1 p-2 rounded-[8px] border-l-[3px] shadow-sm flex flex-col gap-0.5 text-[13px] transition-colors ${isMine ? 'bg-[#dcf8c6]/50 dark:bg-[#025144]/30 border-[#02a698] dark:border-[#21c062]' : 'bg-[#f0f2f5]/80 dark:bg-[#202c33]/80 border-[#00a884] dark:border-[#00a884]'}`}>
+                                        <div className={`font-semibold text-[12.5px] truncate px-1 ${isMine ? 'text-[#02a698] dark:text-[#21c062]' : 'text-[#00a884] dark:text-[#00a884]'}`}>{replyContext.sender}</div>
+                                        <div className="line-clamp-3 text-[#54656f] dark:text-[#aebac1] min-h-[1.2em] px-1 opacity-90">{replyContext.snippet}</div>
                                     </div>
                                 )}
 

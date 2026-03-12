@@ -16,7 +16,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 def get_password_hash(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    # Use 10 rounds to improve login speed. (Default was 12)
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=10)).decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()

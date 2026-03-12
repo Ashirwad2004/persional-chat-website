@@ -50,7 +50,7 @@ def get_conversations_summary(db: Session = Depends(get_db), current_user: User 
             }
         
         # If the other person sent it, and it's not read, increment unread count
-        if msg.sender_id == other_id and not msg.is_read:
+        if msg.sender_id == other_id and msg.status != "read":
             summaries[other_id]["unread_count"] += 1
             
     return list(summaries.values())
@@ -85,8 +85,8 @@ def get_messages(
 def mark_messages_read(other_user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Mark all messages sent by `other_user_id` to `current_user` as read
     db.query(Message).filter(
-        and_(Message.sender_id == other_user_id, Message.receiver_id == current_user.id, Message.is_read == False)
-    ).update({"is_read": True}, synchronize_session=False)
+        and_(Message.sender_id == other_user_id, Message.receiver_id == current_user.id, Message.status != "read")
+    ).update({"status": "read"}, synchronize_session=False)
     db.commit()
     return {"message": "Messages marked as read"}
 

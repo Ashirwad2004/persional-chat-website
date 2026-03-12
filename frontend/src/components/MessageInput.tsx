@@ -168,28 +168,28 @@ export default function MessageInput() {
 
     return (
         <footer className="px-4 py-[10px] bg-wa-header-light dark:bg-wa-header-dark border-t border-transparent shrink-0">
-            <form onSubmit={handleSend} className="relative group flex flex-col gap-2">
+            <form onSubmit={handleSend} className="relative group flex flex-col gap-0">
                 {replyingTo && (
-                    <div className="bg-wa-panel-dark p-2 md:p-3 rounded-xl border-l-4 border-primary flex items-start justify-between shadow-sm animate-fade-in relative mx-12">
-                        <div className="flex flex-col overflow-hidden w-full bg-[#202c33] px-3 py-1.5 rounded-r-lg">
-                            <span className="text-[13px] font-bold text-primary mb-0.5">
+                    <div className="bg-slate-100 dark:bg-wa-panel-dark mx-2 md:mx-4 mb-2 p-2.5 rounded-t-xl border-l-[4px] border-[#02a698] dark:border-[#21c062] flex items-start justify-between shadow-sm animate-fade-in relative z-0 opacity-95">
+                        <div className="flex flex-col overflow-hidden w-full px-2">
+                            <span className="text-[13px] font-bold text-[#02a698] dark:text-[#21c062] mb-0.5">
                                 {users.find(u => u.id === replyingTo.sender_id)?.email || currentUser?.email || 'User'}
                             </span>
-                            <span className="text-[13px] text-slate-400 truncate pr-6 block max-w-full">
+                            <span className="text-[13px] text-slate-500 dark:text-slate-400 truncate pr-6 block max-w-full leading-snug">
                                 {replyingTo.content.startsWith('AUDIO:') ? '🎵 Voice Message' : (replyingTo.content.startsWith('REPLY::') ? replyingTo.content.split('::').slice(4).join('::') : replyingTo.content)}
                             </span>
                         </div>
                         <button
                             type="button"
                             onClick={() => setReplyingTo(null)}
-                            className="text-slate-400 hover:text-slate-200 transition-colors p-1 flex items-center justify-center absolute right-3 top-3"
+                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1.5 flex items-center justify-center absolute right-2 top-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
                         >
                             <span className="material-symbols-outlined text-[18px]">close</span>
                         </button>
                     </div>
                 )}
 
-                <div className="flex items-end gap-2 px-2">
+                <div className="flex items-end gap-2 px-2 z-10">
                     {/* Left Icons */}
                     <div className="flex items-center gap-1 pb-1">
                         <div className="relative" ref={emojiPickerRef}>
