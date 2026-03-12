@@ -39,7 +39,19 @@ body {
     }
 .bg-login-image {
     background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB-qW6z4udQQ9uHSkSYhMmzcuC7BrFrd_QHqD4xWZtNr2hrcPpPfUUw17PCY-_7J9eDqoroJA1WvyklLARb7HqNi58lGomlQ7IGdfyzZtw7KUdNC-Sqp_RavZTXOT9NtLfrw-78u58nQYDALNTJlu6phbSYTD3iCJXj5YTdGTAyKOwCPXG7gTEEE_PV7uBtkAKvDU9uPM9PAo4s6aL9zPoSe-PUO38-HLAtV7q4S_bkS99KPKfq7YE9Yl7AtVKk-THgbb0Hv3sC4XjF)
-    }</style>
+    }
+
+@keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+</style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 <div class="relative flex min-h-screen w-full flex-col @container overflow-hidden">
@@ -62,9 +74,9 @@ body {
 </div>
 <div class="flex gap-4">
 <div class="flex -space-x-3">
-<img class="h-10 w-10 rounded-full border-2 border-white" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcdQ5n6Tdq2GjdDMU0enkHTHdCvqm0_evFen1JsPNgEdz5IMuKC7kpq325qyRL8KJgsWJowLPnLURmd6YboOvHycjDdI8WTmMryV4S0z1AoLxpPVNkiPZEVgMNTpVUc_02OocaYM4z_-JFG3onyqlLvRN3_olAFNEsURin9yYSJdbsYe6Rc78ya0MFX093IpEfltu3V8l9HCdwMLEv81kj0oZZ4V4If2df_XkOwX-6HEl21jSZe97jEWlZsEfzvCKOaKOESfgysXb9"/>
-<img class="h-10 w-10 rounded-full border-2 border-white" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaz_X-zq70qCYvbhqbf3McWeeVnwO1ZyKPkk9zLx_MR9n9HeifAigmb3WV5IKgtUcrcurG8Ys52P2wiIdQd9fY8KW0DArqIwFARvIHFAnGut7gT31dVoiaotP_nz9mIu3DYuSqn-NHXkpRDLfIjQvpKOrmEKye4_XHCnlp9AbyVU-dbQSIFW1dCrkAz-PWWve_oghtQwRIqCuWE845UfGgPppRhOabsWcOvHV43dfhLzDK-rL-nSiwOBQYDjlAXKsRSJRLpyrT5fVF"/>
-<img class="h-10 w-10 rounded-full border-2 border-white" data-alt="User avatar 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-ArZd6byCqCtvvcGZeNyvxlE8ar3H3xVPx8IJCmbFJ-dq3fkmnrOo3LfKMLL943fx8s3dpCv6xw3mysGiB0K_KM9GC4uOfotCuQt2v1P2kJZIAIfCHdj-hxQl8ojYCnPtV5YdL-N1FINFOJPs76DBhmW6LK7ivZbhjlE3g4JWEeMQOI0E24zts5b_t_Hy3_tX4yx0pIsAM27c1cgIy0DjzupP_dF8imQVoAihi72bMHrrymhwMc590sQiR4H0-c2zu7YsVuFx2F4A"/>
+<img class="h-10 w-10 rounded-full border-2 border-white transition-transform duration-300 hover:scale-110 hover:z-10 cursor-pointer" data-alt="User avatar 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcdQ5n6Tdq2GjdDMU0enkHTHdCvqm0_evFen1JsPNgEdz5IMuKC7kpq325qyRL8KJgsWJowLPnLURmd6YboOvHycjDdI8WTmMryV4S0z1AoLxpPVNkiPZEVgMNTpVUc_02OocaYM4z_-JFG3onyqlLvRN3_olAFNEsURin9yYSJdbsYe6Rc78ya0MFX093IpEfltu3V8l9HCdwMLEv81kj0oZZ4V4If2df_XkOwX-6HEl21jSZe97jEWlZsEfzvCKOaKOESfgysXb9"/>
+<img class="h-10 w-10 rounded-full border-2 border-white transition-transform duration-300 hover:scale-110 hover:z-10 cursor-pointer" data-alt="User avatar 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaz_X-zq70qCYvbhqbf3McWeeVnwO1ZyKPkk9zLx_MR9n9HeifAigmb3WV5IKgtUcrcurG8Ys52P2wiIdQd9fY8KW0DArqIwFARvIHFAnGut7gT31dVoiaotP_nz9mIu3DYuSqn-NHXkpRDLfIjQvpKOrmEKye4_XHCnlp9AbyVU-dbQSIFW1dCrkAz-PWWve_oghtQwRIqCuWE845UfGgPppRhOabsWcOvHV43dfhLzDK-rL-nSiwOBQYDjlAXKsRSJRLpyrT5fVF"/>
+<img class="h-10 w-10 rounded-full border-2 border-white transition-transform duration-300 hover:scale-110 hover:z-10 cursor-pointer" data-alt="User avatar 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-ArZd6byCqCtvvcGZeNyvxlE8ar3H3xVPx8IJCmbFJ-dq3fkmnrOo3LfKMLL943fx8s3dpCv6xw3mysGiB0K_KM9GC4uOfotCuQt2v1P2kJZIAIfCHdj-hxQl8ojYCnPtV5YdL-N1FINFOJPs76DBhmW6LK7ivZbhjlE3g4JWEeMQOI0E24zts5b_t_Hy3_tX4yx0pIsAM27c1cgIy0DjzupP_dF8imQVoAihi72bMHrrymhwMc590sQiR4H0-c2zu7YsVuFx2F4A"/>
 </div>
 <div class="text-sm font-medium flex items-center">
                         Joined by 10k+ people this week
@@ -74,7 +86,7 @@ body {
 </div>
 <!-- Right Side: Login Area -->
 <div class="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-white dark:bg-background-dark">
-<div class="w-full max-w-[440px] flex flex-col gap-8">
+<div class="w-full max-w-[440px] flex flex-col gap-8 opacity-0 animate-slide-up">
 <!-- Welcome Header -->
 <div class="flex flex-col gap-2">
 <h1 class="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-tight">
@@ -85,14 +97,14 @@ body {
                     </p>
 </div>
 <!-- Form Section -->
-<div class="flex flex-col gap-5">
+<div class="flex flex-col gap-5 opacity-0 animate-slide-up delay-100">
 <!-- Social Login -->
 <div class="grid grid-cols-2 gap-4 mb-2">
-<button class="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<button class="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
 <img class="w-5 h-5" data-alt="Google logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGHCFMbYrNqOgUst9yF5yNFM-qafn5bwop2f43KTsyR4OvURZAyoAFKmm-3LEX7glxycXSCjExBgttRTj9S_uR-Zp_5tRGL61XL5MYf8fJJlWP2jGcHyNBvtFcim13ZTnGQHRaZafE_K5IPKH4nyVqUQ79z10k_CbbfKr9lzBo8tXDRU9QLEz3Kr271ECnAGz7xK-Gu6cOh4nLj2C6bRMxHM-cfTlr3prJPvkqlRsqqR8ExP8XDth94ewG1UdSajQbZqu45gqTjetX"/>
 <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Google</span>
 </button>
-<button class="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<button class="flex items-center justify-center gap-2 h-12 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-0.5 hover:shadow-md">
 <span class="material-symbols-outlined text-slate-700 dark:text-slate-300">ios</span>
 <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Apple</span>
 </button>
@@ -108,7 +120,7 @@ body {
 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
 <span class="material-symbols-outlined text-[20px]">alternate_email</span>
 </div>
-<input class="flex w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 h-14 pl-12 pr-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-base" placeholder="name@example.com" type="email"/>
+<input class="flex w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 h-14 pl-12 pr-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all text-base shadow-sm hover:border-primary/50" placeholder="name@example.com" type="email"/>
 </div>
 </div>
 <!-- Input: Password -->
@@ -121,7 +133,7 @@ body {
 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
 <span class="material-symbols-outlined text-[20px]">lock_open</span>
 </div>
-<input class="flex w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 h-14 pl-12 pr-12 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-base" placeholder="••••••••" type="password"/>
+<input class="flex w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 h-14 pl-12 pr-12 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all text-base shadow-sm hover:border-primary/50" placeholder="••••••••" type="password"/>
 <button class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
 <span class="material-symbols-outlined text-[20px]">visibility</span>
 </button>
@@ -135,7 +147,7 @@ body {
 </label>
 </div>
 <!-- Action Button -->
-<button class="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-primary text-white text-base font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:scale-[1.01] active:scale-[0.98]">
+<button class="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-gradient-to-r from-primary to-indigo-600 text-white text-base font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:from-indigo-600 hover:to-primary transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                         Sign In
                     </button>
 </div>
