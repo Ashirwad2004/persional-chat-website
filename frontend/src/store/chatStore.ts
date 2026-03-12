@@ -18,6 +18,30 @@ export interface ChatMessage {
     status?: 'pending' | 'sent' | 'error';
 }
 
+export type CallStatus = 'incoming' | 'outgoing' | 'connected' | 'ended' | 'rejected' | 'missed';
+
+export interface CallState {
+    id: string; // unique call id
+    remoteUser: User;
+    status: CallStatus;
+    isAudioOnly: boolean;
+}
+
+export interface CallHistoryRecord {
+    id: number;
+    caller_id: number;
+    receiver_id: number;
+    start_time: string;
+    end_time: string | null;
+    status: 'missed' | 'in_progress' | 'completed' | 'rejected';
+    is_video: boolean;
+    other_user: {
+        id: number;
+        email: string;
+        profile_picture_url: string | null;
+    }
+}
+
 interface ChatState {
     currentUser: User | null;
     users: User[];
@@ -28,6 +52,8 @@ interface ChatState {
     summaries: Record<number, { last_message: string; unread_count: number; timestamp?: string }>;
     hasMoreMessages: boolean;
     replyingTo: ChatMessage | null;
+    activeCall: CallState | null;
+    callHistory: CallHistoryRecord[];
 
     setCurrentUser: (user: User | null) => void;
     setUsers: (users: User[]) => void;
@@ -40,6 +66,8 @@ interface ChatState {
     setSummaries: (updater: (prev: Record<number, { last_message: string; unread_count: number; timestamp?: string }>) => Record<number, { last_message: string; unread_count: number; timestamp?: string }>) => void;
     setHasMoreMessages: (hasMore: boolean) => void;
     setReplyingTo: (msg: ChatMessage | null) => void;
+    setActiveCall: (call: CallState | null) => void;
+    setCallHistory: (calls: CallHistoryRecord[]) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -52,6 +80,8 @@ export const useChatStore = create<ChatState>((set) => ({
     summaries: {},
     hasMoreMessages: true,
     replyingTo: null,
+    activeCall: null,
+    callHistory: [],
 
     setCurrentUser: (user) => set({ currentUser: user }),
     setUsers: (users) => set({ users }),
@@ -78,4 +108,6 @@ export const useChatStore = create<ChatState>((set) => ({
     })),
     setHasMoreMessages: (hasMore) => set({ hasMoreMessages: hasMore }),
     setReplyingTo: (msg) => set({ replyingTo: msg }),
+    setActiveCall: (call) => set({ activeCall: call }),
+    setCallHistory: (calls) => set({ callHistory: calls }),
 }));

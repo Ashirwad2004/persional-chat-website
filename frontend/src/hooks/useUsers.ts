@@ -11,10 +11,12 @@ export function useUsers() {
     const fetchInitialUsers = useCallback(async () => {
         setIsLoading(true);
         try {
-            const me = await usersApi.getCurrentUser();
+            const [me, allUsers] = await Promise.all([
+                usersApi.getCurrentUser(),
+                usersApi.getAllUsers()
+            ]);
+            
             setCurrentUser(me);
-
-            const allUsers = await usersApi.getAllUsers();
             setUsers(allUsers);
         } catch (error) {
             console.error("Failed to fetch users", error);

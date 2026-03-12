@@ -10,10 +10,13 @@ from app.core.database import engine, Base, SessionLocal
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.api.messages import router as messages_router
+from app.api.calls import router as calls_router
 from app.models.user import User
 from app.models.message import Message
+from app.models.call import Call, CallStatus
 import app.models.user 
 import app.models.message 
+import app.models.call 
 
 # Create all tables in the database (SQLite)
 Base.metadata.create_all(bind=engine)
@@ -33,6 +36,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(users_router, prefix="/users", tags=["users"])
 app.include_router(messages_router, prefix="/messages", tags=["messages"])
+app.include_router(calls_router, prefix="/calls", tags=["calls"])
 
 # Mount static files folder dynamically
 os.makedirs("uploads/avatars", exist_ok=True)
@@ -173,10 +177,55 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(None)):
                             "message_ids": message_ids
                         }
                         await manager.send_personal_message(json.dumps(response_payload), receiver_id)
+
+                elif msg_type in ["call_offer", "call_answer", "ice_candidate", "call_reject", "call_end"]:
+                    # WebRTC signaling routing & Call History tracking
+                    
+                    if msg_type == "call_offer":
+                         is_video = message_data.get("is_video", True)
+                         new_call = Call(
+                             caller_id=user.id, 
+                             receiver_id=receiver_id, 
+                             status=CallStatus.MISSED.value,
+                             is_video=is_video
+                         )
+                         db.add(new_call)
+                         db.commit()
+                         db.refresh(new_call)
+                         message_data["call_id"] = new_call.id
+                         
+                    elif msg_type == "call_answer":
+                         call_id = message_data.get("call_id")
+                         if call_id:
+                             db.query(Call).filter(Call.id == call_id).update({"status": CallStatus.IN_PROGRESS.value})
+                             db.commit()
+                             
+                    elif msg_type == "call_reject":
+                         call_id = message_data.get("call_id")
+                         if call_id:
+                             from datetime import datetime, timezone
+                             db.query(Call).filter(Call.id == call_id).update({
+                                 "status": CallStatus.REJECTED.value,
+                                 "end_time": datetime.now(timezone.utc)
+                             })
+                             db.commit()
+                             
+                    elif msg_type == "call_end":
+                         call_id = message_data.get("call_id")
+                         if call_id:
+                             from datetime import datetime, timezone
+                             db.query(Call).filter(Call.id == call_id).update({
+                                 "status": CallStatus.COMPLETED.value,
+                                 "end_time": datetime.now(timezone.utc)
+                             })
+                             db.commit()
+
+                    await manager.send_personal_message(json.dumps(message_data), receiver_id)
                         
             except json.JSONDecodeError:
                 pass # Ignore malformed JSON messages
             except Exception as e:
+                db.rollback()
                 import traceback
                 error_str = traceback.format_exc()
                 with open("exception.log", "a") as f:

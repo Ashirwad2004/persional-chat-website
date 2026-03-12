@@ -4,7 +4,7 @@ from datetime import datetime
 class MessageBase(BaseModel):
     content: str
     receiver_id: int
-    is_read: bool = False
+    status: str = "sent"
 
 class MessageCreate(MessageBase):
     pass
