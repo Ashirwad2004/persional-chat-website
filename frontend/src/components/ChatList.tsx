@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useMessages } from '../hooks/useMessages';
 import { useUsers } from '../hooks/useUsers';
 import { API_BASE_URL } from '../config';
 
 export default function ChatList() {
-    const { currentUser, users, activeUser, setActiveUser, onlineUsers, typingUsers, summaries } = useChatStore();
+    const { currentUser, users, activeUser, setActiveUser, onlineUsers, typingUsers, summaries, setSettingsOpen } = useChatStore();
     const { deleteChatHistory } = useMessages();
     const { uploadAvatar } = useUsers();
+    const [searchQuery, setSearchQuery] = useState('');
 
     const getInitials = (email: string) => email.substring(0, 2).toUpperCase();
 
@@ -45,7 +47,7 @@ export default function ChatList() {
                 <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
                     <button className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><span className="material-symbols-outlined text-xl">data_usage</span></button>
                     <button className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><span className="material-symbols-outlined text-xl">chat</span></button>
-                    <button className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><span className="material-symbols-outlined text-xl">more_vert</span></button>
+                    <button onClick={() => setSettingsOpen(true)} className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors" title="Settings"><span className="material-symbols-outlined text-xl">settings</span></button>
                 </div>
             </div>
 
@@ -53,11 +55,24 @@ export default function ChatList() {
             <div className="p-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="relative bg-[#f0f2f5] dark:bg-[#202c33] rounded-lg flex items-center px-3 py-1.5 overflow-hidden">
                     <span className="material-symbols-outlined text-slate-500 text-sm mr-4">search</span>
-                    <input className="w-full bg-transparent outline-none text-[15px] placeholder-slate-500 text-slate-800 dark:text-slate-200 min-h-[26px]" placeholder="Search or start new chat" type="text" />
+                    <input 
+                        className="w-full bg-transparent outline-none text-[15px] placeholder-slate-500 text-slate-800 dark:text-slate-200 min-h-[26px]" 
+                        placeholder="Search or start new chat" 
+                        type="text" 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    {searchQuery && (
+                        <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 ml-1">
+                            <span className="material-symbols-outlined text-sm">close</span>
+                        </button>
+                    )}
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto bg-white dark:bg-wa-panel-dark pb-20 md:pb-0">
-                {[...users].sort((a, b) => {
+                {[...users]
+                .filter(user => user.email.toLowerCase().includes(searchQuery.toLowerCase()))
+                .sort((a, b) => {
                     const timeA = summaries[a.id]?.timestamp ? new Date(summaries[a.id].timestamp!).getTime() : 0;
                     const timeB = summaries[b.id]?.timestamp ? new Date(summaries[b.id].timestamp!).getTime() : 0;
                     return timeB - timeA;

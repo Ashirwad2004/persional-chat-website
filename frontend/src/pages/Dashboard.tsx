@@ -11,9 +11,10 @@ import CallHistoryList from '../components/CallHistoryList';
 import ChatWindow from '../components/ChatWindow';
 import MessageInput from '../components/MessageInput';
 import CallOverlay from '../components/CallOverlay';
+import SettingsModal from '../components/SettingsModal';
 
 export default function Dashboard() {
-    const { currentUser, activeUser, summaries } = useChatStore();
+    const { currentUser, activeUser, summaries, setSettingsOpen } = useChatStore();
     const { fetchInitialUsers } = useUsers();
     const { fetchSummaries, fetchChatHistory } = useMessages();
     const { fetchCallHistory } = useCalls();
@@ -62,6 +63,7 @@ export default function Dashboard() {
     return (
         <div className="flex h-[100dvh] bg-white dark:bg-wa-panel-dark text-slate-900 dark:text-slate-100 antialiased overflow-hidden w-full relative">
             <CallOverlay />
+            <SettingsModal />
 
             {/* Sidebar Desktop Toggle (Optional, can be added later if needed) */}
             
@@ -97,7 +99,10 @@ export default function Dashboard() {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: activeTab === 'calls' ? "'FILL' 1" : "'FILL' 0" }}>call</span>
                         <span className="text-[10px] font-medium">Calls</span>
                     </button>
-                    <button className="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1">
+                    <button 
+                        onClick={() => setSettingsOpen(true)}
+                        className="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1"
+                    >
                         <div className="relative">
                             <span className="material-symbols-outlined">settings</span>
                         </div>

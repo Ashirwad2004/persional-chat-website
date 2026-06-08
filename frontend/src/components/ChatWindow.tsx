@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useMessages } from '../hooks/useMessages';
@@ -6,7 +6,7 @@ import { useWebRTC } from '../hooks/useWebRTC';
 import { API_BASE_URL, WS_BASE_URL } from '../config';
 
 export default function ChatWindow() {
-    const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages, setReplyingTo } = useChatStore();
+    const { currentUser, activeUser, setActiveUser, onlineUsers, typingUsers, messages, hasMoreMessages, setReplyingTo, wallpaper } = useChatStore();
     const { sendReadReceipt } = useWebSocket(`${WS_BASE_URL}/ws/chat`);
     const { markAsRead, deleteChatHistory, loadMoreMessages } = useMessages();
     const { startCall } = useWebRTC();
@@ -16,6 +16,49 @@ export default function ChatWindow() {
     const isFetchingRef = useRef(false);
     const prevScrollHeightRef = useRef<number>(0);
     const lastMessageIdRef = useRef<number | null>(null);
+
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const highlightText = (text: string, query: string) => {
+        if (!query) return text;
+        const parts = text.split(new RegExp(`(${query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
+        return (
+            <>
+                {parts.map((part, index) => 
+                    part.toLowerCase() === query.toLowerCase()
+                        ? <mark key={index} className="bg-yellow-200 dark:bg-yellow-500/40 text-slate-900 dark:text-white rounded-sm px-0.5 font-medium">{part}</mark>
+                        : part
+                )}
+            </>
+        );
+    };
+
+    const matchCount = searchQuery 
+        ? messages.filter(msg => {
+            let content = msg.content;
+            if (content.startsWith('REPLY::')) {
+                const parts = content.split('::');
+                content = parts.slice(4).join('::');
+            }
+            return !content.startsWith('AUDIO:') && content.toLowerCase().includes(searchQuery.toLowerCase());
+          }).length
+        : 0;
+
+    const getWallpaperClass = () => {
+        switch (wallpaper) {
+            case 'lavender':
+                return 'bg-[#efe6f7] dark:bg-[#211b27]';
+            case 'sage':
+                return 'bg-[#e3eae4] dark:bg-[#1a231d]';
+            case 'teal':
+                return 'bg-[#e0f2f1] dark:bg-[#072421]';
+            case 'slate':
+                return 'bg-[#e2e8f0] dark:bg-[#1e293b]';
+            default:
+                return 'bg-wa-chat-light dark:bg-wa-chat-dark';
+        }
+    };
 
     const getInitials = (email: string) => email.substring(0, 2).toUpperCase();
     const formatTime = (isoString?: string) => {
@@ -104,57 +147,104 @@ export default function ChatWindow() {
     }
 
     return (
-        <div className={`flex-1 flex-col relative bg-wa-chat-light dark:bg-wa-chat-dark h-full ${activeUser ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`flex-1 flex-col relative ${getWallpaperClass()} h-full ${activeUser ? 'flex' : 'hidden md:flex'}`}>
             {/* Chat Header */}
             <header className="h-[60px] flex items-center justify-between px-4 border-l border-transparent bg-wa-header-light dark:bg-wa-header-dark z-10 shrink-0">
-                <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
-                    <button
-                        onClick={() => setActiveUser(null)}
-                        className="md:hidden p-1 -ml-2 text-slate-500 hover:text-slate-600 transition-all flex items-center justify-center"
-                    >
-                        <span className="material-symbols-outlined text-xl">arrow_back</span>
-                    </button>
-                    <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
-                            {activeUser.profile_picture_url ? (
-                                <img src={`${API_BASE_URL}${activeUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                                getInitials(activeUser.email)
+                {showSearch ? (
+                    <div className="flex-1 flex items-center gap-3 h-full">
+                        <button 
+                            onClick={() => {
+                                setShowSearch(false);
+                                setSearchQuery('');
+                            }}
+                            className="p-1.5 text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+                        >
+                            <span className="material-symbols-outlined text-xl">arrow_back</span>
+                        </button>
+                        <div className="flex-1 relative bg-white dark:bg-wa-panel-dark rounded-xl flex items-center px-4 py-1.5 border border-slate-200/60 dark:border-slate-800/60 shadow-sm max-w-xl">
+                            <span className="material-symbols-outlined text-slate-400 text-sm mr-3">search</span>
+                            <input 
+                                className="w-full bg-transparent border-none focus:ring-0 text-[14px] text-slate-800 dark:text-slate-200 outline-none" 
+                                placeholder="Search message content..." 
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                autoFocus
+                            />
+                            {searchQuery && (
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs text-slate-400 font-semibold shrink-0 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{matchCount} matches</span>
+                                    <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center">
+                                        <span className="material-symbols-outlined text-sm">close</span>
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
-                    <div className="ml-1">
-                        <h2 className="font-normal text-[16px] text-[#111b21] dark:text-[#e9edef]">{activeUser.email}</h2>
-                        <p className={`text-[13px] ${onlineUsers.has(activeUser.id) ? 'text-[#54656f] dark:text-[#aebac1]' : 'text-[#54656f] dark:text-[#aebac1]'}`}>
-                            {onlineUsers.has(activeUser.id) ? 'online' : 'click for contact info'}
-                        </p>
+                ) : (
+                    <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
+                        <button
+                            onClick={() => setActiveUser(null)}
+                            className="md:hidden p-1 -ml-2 text-slate-500 hover:text-slate-600 transition-all flex items-center justify-center"
+                        >
+                            <span className="material-symbols-outlined text-xl">arrow_back</span>
+                        </button>
+                        <div className="relative shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
+                                {activeUser.profile_picture_url ? (
+                                    <img src={`${API_BASE_URL}${activeUser.profile_picture_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    getInitials(activeUser.email)
+                                )}
+                            </div>
+                        </div>
+                        <div className="ml-1">
+                            <h2 className="font-normal text-[16px] text-[#111b21] dark:text-[#e9edef]">{activeUser.email}</h2>
+                            <p className={`text-[13px] ${onlineUsers.has(activeUser.id) ? 'text-[#54656f] dark:text-[#aebac1]' : 'text-[#54656f] dark:text-[#aebac1]'}`}>
+                                {onlineUsers.has(activeUser.id) ? 'online' : 'click for contact info'}
+                            </p>
+                        </div>
                     </div>
-                </div>
+                )}
+                
                 <div className="flex items-center gap-2 md:gap-4 text-[#54656f] dark:text-[#aebac1]">
+                    {!showSearch && (
+                        <>
+                            <button 
+                                onClick={() => activeUser && startCall(activeUser, true)}
+                                className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
+                                title="Video Call"
+                            >
+                                <span className="material-symbols-outlined text-[24px]">videocam</span>
+                            </button>
+                            <button 
+                                onClick={() => activeUser && startCall(activeUser, false)}
+                                className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
+                                title="Voice Call"
+                            >
+                                <span className="material-symbols-outlined text-[24px]">call</span>
+                            </button>
+                        </>
+                    )}
                     <button 
-                        onClick={() => activeUser && startCall(activeUser, true)}
-                        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
-                        title="Video Call"
+                        onClick={() => {
+                            setShowSearch(!showSearch);
+                            if (showSearch) setSearchQuery('');
+                        }}
+                        className={`p-2 rounded-full transition-all flex items-center justify-center ${showSearch ? 'bg-primary/15 text-primary' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+                        title="Search messages"
                     >
-                        <span className="material-symbols-outlined text-[24px]">videocam</span>
-                    </button>
-                    <button 
-                        onClick={() => activeUser && startCall(activeUser, false)}
-                        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
-                        title="Voice Call"
-                    >
-                        <span className="material-symbols-outlined text-[24px]">call</span>
-                    </button>
-                    <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center">
                         <span className="material-symbols-outlined text-[24px]">search</span>
                     </button>
-                    <button
-                        onClick={handleDeleteChat}
-                        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
-                        title="Delete Chat History"
-                    >
-                        <span className="material-symbols-outlined text-[24px]">delete</span>
-                    </button>
+                    {!showSearch && (
+                        <button
+                            onClick={handleDeleteChat}
+                            className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-all flex items-center justify-center"
+                            title="Delete Chat History"
+                        >
+                            <span className="material-symbols-outlined text-[24px]">delete</span>
+                        </button>
+                    )}
                 </div>
             </header>
 
@@ -222,7 +312,7 @@ export default function ChatWindow() {
                                         {isAudio ? (
                                             <audio controls src={`${API_BASE_URL}${audioUrl}`} className="h-9 w-52" />
                                         ) : (
-                                            displayContent
+                                            highlightText(displayContent, searchQuery)
                                         )}
                                     </div>
 

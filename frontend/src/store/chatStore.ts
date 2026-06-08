@@ -54,6 +54,8 @@ interface ChatState {
     replyingTo: ChatMessage | null;
     activeCall: CallState | null;
     callHistory: CallHistoryRecord[];
+    isSettingsOpen: boolean;
+    wallpaper: string;
 
     setCurrentUser: (user: User | null) => void;
     setUsers: (users: User[]) => void;
@@ -68,6 +70,8 @@ interface ChatState {
     setReplyingTo: (msg: ChatMessage | null) => void;
     setActiveCall: (call: CallState | null) => void;
     setCallHistory: (calls: CallHistoryRecord[]) => void;
+    setSettingsOpen: (isOpen: boolean) => void;
+    setWallpaper: (wallpaper: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -82,6 +86,8 @@ export const useChatStore = create<ChatState>((set) => ({
     replyingTo: null,
     activeCall: null,
     callHistory: [],
+    isSettingsOpen: false,
+    wallpaper: localStorage.getItem('chat_wallpaper') || 'default',
 
     setCurrentUser: (user) => set({ currentUser: user }),
     setUsers: (users) => set({ users }),
@@ -110,4 +116,9 @@ export const useChatStore = create<ChatState>((set) => ({
     setReplyingTo: (msg) => set({ replyingTo: msg }),
     setActiveCall: (call) => set({ activeCall: call }),
     setCallHistory: (calls) => set({ callHistory: calls }),
+    setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
+    setWallpaper: (wallpaper) => {
+        localStorage.setItem('chat_wallpaper', wallpaper);
+        set({ wallpaper });
+    },
 }));
