@@ -56,6 +56,8 @@ interface ChatState {
     callHistory: CallHistoryRecord[];
     isSettingsOpen: boolean;
     wallpaper: string;
+    localStream: MediaStream | null;
+    remoteStream: MediaStream | null;
 
     setCurrentUser: (user: User | null) => void;
     setUsers: (users: User[]) => void;
@@ -72,6 +74,8 @@ interface ChatState {
     setCallHistory: (calls: CallHistoryRecord[]) => void;
     setSettingsOpen: (isOpen: boolean) => void;
     setWallpaper: (wallpaper: string) => void;
+    setLocalStream: (stream: MediaStream | null) => void;
+    setRemoteStream: (stream: MediaStream | null) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -88,6 +92,8 @@ export const useChatStore = create<ChatState>((set) => ({
     callHistory: [],
     isSettingsOpen: false,
     wallpaper: localStorage.getItem('chat_wallpaper') || 'default',
+    localStream: null,
+    remoteStream: null,
 
     setCurrentUser: (user) => set({ currentUser: user }),
     setUsers: (users) => set({ users }),
@@ -121,4 +127,6 @@ export const useChatStore = create<ChatState>((set) => ({
         localStorage.setItem('chat_wallpaper', wallpaper);
         set({ wallpaper });
     },
+    setLocalStream: (stream) => set({ localStream: stream }),
+    setRemoteStream: (stream) => set({ remoteStream: stream }),
 }));

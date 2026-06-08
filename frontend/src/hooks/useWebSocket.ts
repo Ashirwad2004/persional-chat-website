@@ -38,6 +38,7 @@ export interface SignalingEvent extends Omit<BaseEvent, 'type'> {
     sdp?: RTCSessionDescriptionInit;
     candidate?: RTCIceCandidateInit;
     call_id?: string | number; // Added for Database Call History tracking
+    is_video?: boolean;
 }
 
 export type WsEvent = ChatMessageEvent | PresenceEvent | TypingEvent | ReadReceiptEvent | SignalingEvent;
