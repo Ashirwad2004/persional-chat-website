@@ -4,7 +4,7 @@ from jose import jwt
 
 SECRET_KEY = "nexus_super_secret_key_change_in_production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 30  # 30 days
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:

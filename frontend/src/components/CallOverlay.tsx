@@ -4,7 +4,7 @@ import { useWebRTC } from '../hooks/useWebRTC';
 import { API_BASE_URL } from '../config';
 
 export default function CallOverlay() {
-    const { activeCall } = useChatStore();
+    const { activeCall, localStream, remoteStream } = useChatStore();
     const { acceptCall, rejectCall, endCall, toggleAudio, toggleVideo } = useWebRTC();
     
     const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -14,28 +14,16 @@ export default function CallOverlay() {
     const [isVideoMuted, setIsVideoMuted] = useState(false);
 
     useEffect(() => {
-        const handleLocalStream = (e: Event) => {
-            const stream = (e as CustomEvent<MediaStream | null>).detail;
-            if (localVideoRef.current) {
-                localVideoRef.current.srcObject = stream;
-            }
-        };
+        if (localVideoRef.current) {
+            localVideoRef.current.srcObject = localStream;
+        }
+    }, [localStream, activeCall?.status]);
 
-        const handleRemoteStream = (e: Event) => {
-            const stream = (e as CustomEvent<MediaStream | null>).detail;
-            if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = stream;
-            }
-        };
-
-        window.addEventListener('webrtc_local_stream', handleLocalStream);
-        window.addEventListener('webrtc_remote_stream', handleRemoteStream);
-
-        return () => {
-            window.removeEventListener('webrtc_local_stream', handleLocalStream);
-            window.removeEventListener('webrtc_remote_stream', handleRemoteStream);
-        };
-    }, []);
+    useEffect(() => {
+        if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = remoteStream;
+        }
+    }, [remoteStream, activeCall?.status]);
 
     const handleToggleAudio = () => {
         const isEnabled = toggleAudio();
@@ -86,7 +74,7 @@ export default function CallOverlay() {
                         </button>
 
                         <button 
-                            onClick={() => acceptCall(false)}
+                            onClick={() => acceptCall(!isAudioOnly)}
                             className="flex flex-col items-center gap-2 group"
                         >
                             <div className="w-14 h-14 rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 animate-bounce">

@@ -54,6 +54,7 @@ export function useWebRTC() {
         // Handle incoming media streams
         pc.ontrack = (event) => {
             remoteStream.current = event.streams[0];
+            useChatStore.getState().setRemoteStream(event.streams[0]);
             // Dispatch custom event to notify UI components
             window.dispatchEvent(new CustomEvent('webrtc_remote_stream', { detail: event.streams[0] }));
         };
@@ -88,11 +89,13 @@ export function useWebRTC() {
             localStream.current.getTracks().forEach(track => track.stop());
             localStream.current = null;
         }
+        useChatStore.getState().setLocalStream(null);
         
         if (remoteStream.current) {
              remoteStream.current.getTracks().forEach(track => track.stop());
              remoteStream.current = null;
         }
+        useChatStore.getState().setRemoteStream(null);
 
         if (peerConnection.current) {
             peerConnection.current.close();
@@ -116,6 +119,7 @@ export function useWebRTC() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
             localStream.current = stream;
+            useChatStore.getState().setLocalStream(stream);
             window.dispatchEvent(new CustomEvent('webrtc_local_stream', { detail: stream }));
 
             setActiveCall({
@@ -133,7 +137,8 @@ export function useWebRTC() {
                 type: 'call_offer',
                 sender_id: currentUser.id,
                 receiver_id: remoteUser.id,
-                sdp: offer
+                sdp: offer,
+                is_video: isVideo
             });
         } catch (error) {
             console.error('Error starting call:', error);
@@ -150,6 +155,7 @@ export function useWebRTC() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
             localStream.current = stream;
+            useChatStore.getState().setLocalStream(stream);
             window.dispatchEvent(new CustomEvent('webrtc_local_stream', { detail: stream }));
 
             let pc = peerConnection.current;
@@ -223,7 +229,7 @@ export function useWebRTC() {
                     id: data.call_id?.toString() || Date.now().toString(),
                     remoteUser: caller,
                     status: 'incoming',
-                    isAudioOnly: false // Will update based on answer
+                    isAudioOnly: !data.is_video
                 });
 
                 const pc = setupPeerConnection(caller.id);

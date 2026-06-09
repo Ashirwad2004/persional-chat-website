@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Signup() {
@@ -7,8 +7,15 @@ export default function Signup() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [localError, setLocalError] = useState('');
+    const navigate = useNavigate();
 
     const { signup, isLoading, error: authError } = useAuth();
+
+    useEffect(() => {
+        if (localStorage.getItem('access_token')) {
+            navigate('/chat');
+        }
+    }, [navigate]);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -1,12 +1,19 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const location = useLocation();
+    const navigate = useNavigate();
     const { login, isLoading, error } = useAuth();
+
+    useEffect(() => {
+        if (localStorage.getItem('access_token')) {
+            navigate('/chat');
+        }
+    }, [navigate]);
 
     // Message from Signup redirect
     const successMessage = location.state?.message;

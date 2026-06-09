@@ -1,6 +1,13 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Landing = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem('access_token'));
+    }, []);
+
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-[100vh]">
             <div className="relative flex min-h-screen flex-col overflow-x-hidden gradient-bg">
@@ -19,8 +26,8 @@ const Landing = () => {
                                 <a className="text-slate-600 dark:text-slate-400 text-sm font-semibold hover:text-primary transition-colors" href="#">Pricing</a>
                             </nav>
                             <div className="flex items-center gap-4">
-                                <Link to="/login" className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-xl h-10 px-5 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-                                    <span>Login</span>
+                                <Link to={isLoggedIn ? "/chat" : "/login"} className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-xl h-10 px-5 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+                                    <span>{isLoggedIn ? "Go to Chat" : "Login"}</span>
                                 </Link>
                                 <div className="hidden sm:block size-10 rounded-full border-2 border-slate-100 dark:border-slate-800 bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCkXKdRWmW9VaC4H26W7YwU6d5uv5VxpA18iG4X4nhMR4fNb4zJsYU11puUTuMZlAwmbfuXOSuRGn4F7opF2E1Zmjqn4cv1C07tf3SH4bFtR-PcZCcxHQFvq-v9ARTgsd-mmzmrnPt23ltTgePXXHVly8-MD9PUDIDlTpGZb9I26j5YstX6bQr2lHkv1yRu7D43MEcxPS6HEoL_dsRQtr4OwfaZHv5pmrAmaSWg_ptcTgm5-RK3JfR1PEdbEfp77DHvwZhN3ERBzmqb')" }}></div>
                             </div>
@@ -40,8 +47,8 @@ const Landing = () => {
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap gap-4">
-                                        <Link to="/signup" className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-14 px-8 bg-primary text-white text-base font-bold shadow-xl shadow-primary/30 hover:scale-[1.02] transition-transform">
-                                            Get Started
+                                        <Link to={isLoggedIn ? "/chat" : "/signup"} className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-14 px-8 bg-primary text-white text-base font-bold shadow-xl shadow-primary/30 hover:scale-[1.02] transition-transform">
+                                            {isLoggedIn ? "Go to Chat" : "Get Started"}
                                         </Link>
                                         <button className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-14 px-8 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                             Learn More
